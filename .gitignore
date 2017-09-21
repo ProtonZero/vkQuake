@@ -1,4 +1,10 @@
+Debug32
+Debug64
+Release32
+Release64
+.objs
 *.suo
+*.layout
 vkquake.VC*
 Misc/vq_pak/vkquake.pak
 Quake/*.dll
