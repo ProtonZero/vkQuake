@@ -316,7 +316,7 @@ void Sbar_DrawScrollString (int x, int y, int width, const char *str)
 	//float scale;
 	//int len, ofs, left;
 
-	//scale = CLAMP (1.0, scr_sbarscale.value, (float)glwidth / 320.0);
+	//scale = CLAMP (1.0, scr_uiscale.value, (float)glwidth / 320.0);
 	//left = x * scale;
 	//if (cl.gametype != GAME_DEATHMATCH)
 	//	left += (((float)glwidth - 320.0 * scale) / 2);
@@ -917,140 +917,133 @@ void Sbar_DrawFace (void)
 Sbar_Draw
 ===============
 */
-void Sbar_Draw (void)
+void Sbar_Draw(void)
 {
 	float w; //johnfitz
 
-	if (scr_con_current == vid.height)
+	if (scr_con_current == vid.height) {
 		return;		// console is full screen
+	}
 
-	if (cl.intermission)
+	if (cl.intermission) {
 		return; //johnfitz -- never draw sbar during intermission
+	}
 
 	sb_updates++;
 
-	GL_SetCanvas (CANVAS_DEFAULT); //johnfitz
+	GL_SetCanvas(CANVAS_DEFAULT); //johnfitz
 
 	//johnfitz -- don't waste fillrate by clearing the area behind the sbar
-	w = CLAMP (320.0f, scr_sbarscale.value * 320.0f, (float)glwidth);
-	if (sb_lines && glwidth > w)
-	{
-		if (scr_sbaralpha.value < 1)
+	w = CLAMP(320.0f, scr_uiscale.value * 320.0f, (float)glwidth);
+	if (sb_lines && glwidth > w) {
+		if (scr_sbaralpha.value < 1) {
 			Draw_TileClear (0, glheight - sb_lines, glwidth, sb_lines);
-		if (cl.gametype == GAME_DEATHMATCH)
+		}
+		if (cl.gametype == GAME_DEATHMATCH) {
 			Draw_TileClear (w, glheight - sb_lines, glwidth - w, sb_lines);
-		else
-		{
+		} else {
 			Draw_TileClear (0, glheight - sb_lines, (glwidth - w) / 2.0f, sb_lines);
 			Draw_TileClear ((glwidth - w) / 2.0f + w, glheight - sb_lines, (glwidth - w) / 2.0f, sb_lines);
 		}
 	}
 	//johnfitz
 
-	GL_SetCanvas (CANVAS_SBAR); //johnfitz
+	GL_SetCanvas(CANVAS_SBAR); //johnfitz
 
 	if (scr_viewsize.value < 110) //johnfitz -- check viewsize instead of sb_lines
 	{
-		Sbar_DrawInventory ();
-		if (cl.maxclients != 1)
-			Sbar_DrawFrags ();
+		Sbar_DrawInventory();
+		if (cl.maxclients != 1) {
+			Sbar_DrawFrags();
+		}
 	}
 
-	if (sb_showscores || cl.stats[STAT_HEALTH] <= 0)
-	{
-		Sbar_DrawPicAlpha (0, 0, sb_scorebar, scr_sbaralpha.value); //johnfitz -- scr_sbaralpha
-		Sbar_DrawScoreboard ();
+	if (sb_showscores || cl.stats[STAT_HEALTH] <= 0) {
+		Sbar_DrawPicAlpha(0, 0, sb_scorebar, scr_sbaralpha.value); //johnfitz -- scr_sbaralpha
+		Sbar_DrawScoreboard();
 		sb_updates = 0;
-	}
-	else if (scr_viewsize.value < 120) //johnfitz -- check viewsize instead of sb_lines
-	{
+	} else if (scr_viewsize.value < 120) { //johnfitz -- check viewsize instead of sb_lines
 		Sbar_DrawPicAlpha (0, 0, sb_sbar, scr_sbaralpha.value); //johnfitz -- scr_sbaralpha
 
    // keys (hipnotic only)
 		//MED 01/04/97 moved keys here so they would not be overwritten
-		if (hipnotic)
-		{
-			if (cl.items & IT_KEY1)
+		if (hipnotic) {
+			if (cl.items & IT_KEY1) {
 				Sbar_DrawPic (209, 3, sb_items[0]);
-			if (cl.items & IT_KEY2)
+			}
+			if (cl.items & IT_KEY2) {
 				Sbar_DrawPic (209, 12, sb_items[1]);
+			}
 		}
 	// armor
-		if (cl.items & IT_INVULNERABILITY)
-		{
-			Sbar_DrawNum (24, 0, 666, 3, 1);
-			Sbar_DrawPic (0, 0, draw_disc);
-		}
-		else
-		{
-			if (rogue)
-			{
-				Sbar_DrawNum (24, 0, cl.stats[STAT_ARMOR], 3,
-								cl.stats[STAT_ARMOR] <= 25);
-				if (cl.items & RIT_ARMOR3)
-					Sbar_DrawPic (0, 0, sb_armor[2]);
-				else if (cl.items & RIT_ARMOR2)
-					Sbar_DrawPic (0, 0, sb_armor[1]);
-				else if (cl.items & RIT_ARMOR1)
-					Sbar_DrawPic (0, 0, sb_armor[0]);
-			}
-			else
-			{
-				Sbar_DrawNum (24, 0, cl.stats[STAT_ARMOR], 3
-				, cl.stats[STAT_ARMOR] <= 25);
-				if (cl.items & IT_ARMOR3)
-					Sbar_DrawPic (0, 0, sb_armor[2]);
-				else if (cl.items & IT_ARMOR2)
-					Sbar_DrawPic (0, 0, sb_armor[1]);
-				else if (cl.items & IT_ARMOR1)
-					Sbar_DrawPic (0, 0, sb_armor[0]);
+		if (cl.items & IT_INVULNERABILITY) {
+			Sbar_DrawNum(24, 0, 666, 3, 1);
+			Sbar_DrawPic(0, 0, draw_disc);
+		} else {
+			Sbar_DrawNum(24, 0, cl.stats[STAT_ARMOR], 3,
+			             cl.stats[STAT_ARMOR] <= 25);
+			if (rogue) {
+				if (cl.items & RIT_ARMOR3) {
+					Sbar_DrawPic(0, 0, sb_armor[2]);
+				} else if (cl.items & RIT_ARMOR2) {
+					Sbar_DrawPic(0, 0, sb_armor[1]);
+				} else if (cl.items & RIT_ARMOR1) {
+					Sbar_DrawPic(0, 0, sb_armor[0]);
+				}
+			} else {
+				if (cl.items & IT_ARMOR3) {
+					Sbar_DrawPic(0, 0, sb_armor[2]);
+				} else if (cl.items & IT_ARMOR2) {
+					Sbar_DrawPic(0, 0, sb_armor[1]);
+				} else if (cl.items & IT_ARMOR1) {
+					Sbar_DrawPic(0, 0, sb_armor[0]);
+				}
 			}
 		}
 
 	// face
-		Sbar_DrawFace ();
+		Sbar_DrawFace();
 
 	// health
-		Sbar_DrawNum (136, 0, cl.stats[STAT_HEALTH], 3
-		, cl.stats[STAT_HEALTH] <= 25);
+		Sbar_DrawNum (136, 0, cl.stats[STAT_HEALTH], 3,
+		              cl.stats[STAT_HEALTH] <= 25);
 
 	// ammo icon
-		if (rogue)
-		{
-			if (cl.items & RIT_SHELLS)
-				Sbar_DrawPic (224, 0, sb_ammo[0]);
-			else if (cl.items & RIT_NAILS)
-				Sbar_DrawPic (224, 0, sb_ammo[1]);
-			else if (cl.items & RIT_ROCKETS)
-				Sbar_DrawPic (224, 0, sb_ammo[2]);
-			else if (cl.items & RIT_CELLS)
-				Sbar_DrawPic (224, 0, sb_ammo[3]);
-			else if (cl.items & RIT_LAVA_NAILS)
-				Sbar_DrawPic (224, 0, rsb_ammo[0]);
-			else if (cl.items & RIT_PLASMA_AMMO)
-				Sbar_DrawPic (224, 0, rsb_ammo[1]);
-			else if (cl.items & RIT_MULTI_ROCKETS)
-				Sbar_DrawPic (224, 0, rsb_ammo[2]);
-		}
-		else
-		{
+		if (rogue) {
+			if (cl.items & RIT_SHELLS) {
+				Sbar_DrawPic(224, 0, sb_ammo[0]);
+			} else if (cl.items & RIT_NAILS) {
+				Sbar_DrawPic(224, 0, sb_ammo[1]);
+			} else if (cl.items & RIT_ROCKETS) {
+				Sbar_DrawPic(224, 0, sb_ammo[2]);
+			} else if (cl.items & RIT_CELLS) {
+				Sbar_DrawPic(224, 0, sb_ammo[3]);
+			} else if (cl.items & RIT_LAVA_NAILS) {
+				Sbar_DrawPic(224, 0, rsb_ammo[0]);
+			} else if (cl.items & RIT_PLASMA_AMMO) {
+				Sbar_DrawPic(224, 0, rsb_ammo[1]);
+			} else if (cl.items & RIT_MULTI_ROCKETS) {
+				Sbar_DrawPic(224, 0, rsb_ammo[2]);
+			}
+		} else {
 			if (cl.items & IT_SHELLS)
-				Sbar_DrawPic (224, 0, sb_ammo[0]);
+				Sbar_DrawPic(224, 0, sb_ammo[0]);
 			else if (cl.items & IT_NAILS)
-				Sbar_DrawPic (224, 0, sb_ammo[1]);
+				Sbar_DrawPic(224, 0, sb_ammo[1]);
 			else if (cl.items & IT_ROCKETS)
-				Sbar_DrawPic (224, 0, sb_ammo[2]);
+				Sbar_DrawPic(224, 0, sb_ammo[2]);
 			else if (cl.items & IT_CELLS)
-				Sbar_DrawPic (224, 0, sb_ammo[3]);
+				Sbar_DrawPic(224, 0, sb_ammo[3]);
 		}
 
-		Sbar_DrawNum (248, 0, cl.stats[STAT_AMMO], 3,
-					  cl.stats[STAT_AMMO] <= 10);
+		Sbar_DrawNum(248, 0, cl.stats[STAT_AMMO], 3,
+		             cl.stats[STAT_AMMO] <= 10);
 	}
 
 	//johnfitz -- removed the vid.width > 320 check here
-	if (cl.gametype == GAME_DEATHMATCH)
-			Sbar_MiniDeathmatchOverlay ();
+	if (cl.gametype == GAME_DEATHMATCH) {
+		Sbar_MiniDeathmatchOverlay ();
+	}
 }
 
 //=============================================================================
@@ -1174,17 +1167,17 @@ void Sbar_DeathmatchOverlay (void)
 Sbar_MiniDeathmatchOverlay
 ==================
 */
-void Sbar_MiniDeathmatchOverlay (void)
+void Sbar_MiniDeathmatchOverlay(void)
 {
-	int	i, k, top, bottom, x, y, f, numlines;
-	char	num[12];
-	float	scale; //johnfitz
-	scoreboard_t	*s;
+	int i, k, top, bottom, x, y, f, numlines;
+	char num[12];
+	float scale; //johnfitz
+	scoreboard_t *s;
 
-	scale = CLAMP (1.0, scr_sbarscale.value, (float)glwidth / 320.0); //johnfitz
+	scale = scr_uiscale.value; //johnfitz
 
 	//MAX_SCOREBOARDNAME = 32, so total width for this overlay plus sbar is 632, but we can cut off some i guess
-	if (glwidth/scale < 512 || scr_viewsize.value >= 120) //johnfitz -- test should consider scr_sbarscale
+	if (glwidth/scale < 512 || scr_viewsize.value >= 120) //johnfitz -- test should consider scr_uiscale
 		return;
 
 // scores

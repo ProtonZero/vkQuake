@@ -69,10 +69,8 @@ typedef enum {
 	CANVAS_TOPRIGHT,
 	CANVAS_INVALID = -1
 } canvastype;
-extern	cvar_t		scr_menuscale;
-extern	cvar_t		scr_sbarscale;
+extern	cvar_t		scr_uiscale;
 extern	cvar_t		scr_conwidth;
-extern	cvar_t		scr_conscale;
 extern	cvar_t		scr_scale;
 extern	cvar_t		scr_crosshairscale;
 //johnfitz

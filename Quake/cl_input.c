@@ -167,54 +167,28 @@ void IN_Impulse (void) {in_impulse=Q_atoi(Cmd_Argv(1));}
 ===============
 CL_KeyState
 
-Returns 0.25 if a key was pressed and released during the frame,
+Returns
+0 if released (whether it just happened or not),
+0.25 if a key was pressed and released,
 0.5 if it was pressed and held
-0 if held then released, and
+0.75 if it was released and pressed
 1.0 if held for the entire time
 ===============
 */
-float CL_KeyState (kbutton_t *key)
-{
-	float		val;
-	qboolean	impulsedown, impulseup, down;
+float CL_KeyState(kbutton_t *key) {
+	qboolean impulsedown, impulseup, down;
 
 	impulsedown = key->state & 2;
 	impulseup = key->state & 4;
 	down = key->state & 1;
-	val = 0;
 
-	if (impulsedown && !impulseup)
-	{
-		if (down)
-			val = 0.5;	// pressed and held this frame
-		else
-			val = 0;	//	I_Error ();
-	}
-	if (impulseup && !impulsedown)
-	{
-		if (down)
-			val = 0;	//	I_Error ();
-		else
-			val = 0;	// released this frame
-	}
-	if (!impulsedown && !impulseup)
-	{
-		if (down)
-			val = 1.0;	// held the entire frame
-		else
-			val = 0;	// up the entire frame
-	}
-	if (impulsedown && impulseup)
-	{
-		if (down)
-			val = 0.75;	// released and re-pressed this frame
-		else
-			val = 0.25;	// pressed and released this frame
-	}
+	key->state &= 1;	// clear impulses
 
-	key->state &= 1;		// clear impulses
-
-	return val;
+	if (!down) {	// most likely up
+		return impulsedown && impulseup ? 0.25 : 0;
+	} else {
+		return impulseup ? 0.75 : (impulsedown ? 0.5 : 1);
+	}
 }
 
 
@@ -223,7 +197,7 @@ float CL_KeyState (kbutton_t *key)
 cvar_t	cl_upspeed = {"cl_upspeed","200",CVAR_NONE};
 cvar_t	cl_forwardspeed = {"cl_forwardspeed","200", CVAR_ARCHIVE};
 cvar_t	cl_backspeed = {"cl_backspeed","200", CVAR_ARCHIVE};
-cvar_t	cl_sidespeed = {"cl_sidespeed","350",CVAR_NONE};
+cvar_t	cl_sidespeed = {"cl_sidespeed","200",CVAR_NONE};
 
 cvar_t	cl_movespeedkey = {"cl_movespeedkey","2.0",CVAR_NONE};
 
@@ -232,7 +206,7 @@ cvar_t	cl_pitchspeed = {"cl_pitchspeed","150",CVAR_NONE};
 
 cvar_t	cl_anglespeedkey = {"cl_anglespeedkey","1.5",CVAR_NONE};
 
-cvar_t	cl_alwaysrun = {"cl_alwaysrun","0",CVAR_ARCHIVE}; // QuakeSpasm -- new always run
+cvar_t	cl_alwaysrun = {"cl_alwaysrun","1",CVAR_ARCHIVE};
 
 /*
 ================

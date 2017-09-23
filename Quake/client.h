@@ -245,6 +245,7 @@ extern	cvar_t	cl_pitchspeed;
 
 extern	cvar_t	cl_anglespeedkey;
 
+extern cvar_t scr_fov;
 extern	cvar_t	cl_alwaysrun; // QuakeSpasm
 
 extern	cvar_t	cl_autofire;

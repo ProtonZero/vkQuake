@@ -659,7 +659,7 @@ void Draw_TileClear (int x, int y, int w, int h)
 	glpic_t	*gl;
 
 	gl = (glpic_t *)draw_backtile->data;
-	
+
 	VkBuffer buffer;
 	VkDeviceSize buffer_offset;
 	basicvertex_t * vertices = (basicvertex_t*)R_VertexAllocate(6 * sizeof(basicvertex_t), &buffer, &buffer_offset);
@@ -822,7 +822,7 @@ static void GL_OrthoMatrix(float left, float right, float bottom, float top, flo
 
 	// Second column
 	matrix[1*4 + 1] = -2.0f / (top-bottom);
-	
+
 	// Third column
 	matrix[2*4 + 2] = -2.0f / (f-n);
 
@@ -872,41 +872,37 @@ void GL_SetCanvas (canvastype newcanvas)
 	switch(newcanvas)
 	{
 	case CANVAS_DEFAULT:
-		GL_OrthoMatrix (0, glwidth, glheight, 0, -99999, 99999);
-		GL_Viewport (glx, gly, glwidth, glheight);
+		GL_OrthoMatrix(0, glwidth, glheight, 0, -99999, 99999);
+		GL_Viewport(glx, gly, glwidth, glheight);
 		break;
 	case CANVAS_CONSOLE:
 		lines = vid.conheight - (scr_con_current * vid.conheight / glheight);
-		GL_OrthoMatrix (0, vid.conwidth, vid.conheight + lines, lines, -99999, 99999);
-		GL_Viewport (glx, gly, glwidth, glheight);
+		GL_OrthoMatrix(0, vid.conwidth, vid.conheight + lines, lines, -99999, 99999);
+		GL_Viewport(glx, gly, glwidth, glheight);
 		break;
 	case CANVAS_MENU:
-		s = q_min((float)glwidth / 320.0, (float)glheight / 200.0);
-		s = CLAMP (1.0, scr_menuscale.value, s);
-		GL_OrthoMatrix (0, 640, 200, 0, -99999, 99999);
-		GL_Viewport (glx + (glwidth - 320*s) / 2, gly + (glheight - 200*s) / 2, 640*s, 200*s);
+		s = scr_uiscale.value;
+		GL_OrthoMatrix(0, 640, 200, 0, -99999, 99999);
+		GL_Viewport(glx + (glwidth - 320*s) / 2, gly + (glheight - 200*s) / 2, 640*s, 200*s);
 		break;
 	case CANVAS_SBAR:
-		s = CLAMP (1.0, scr_sbarscale.value, (float)glwidth / 320.0);
-		if (cl.gametype == GAME_DEATHMATCH)
-		{
-			GL_OrthoMatrix (0, glwidth / s, 48, 0, -99999, 99999);
-			GL_Viewport (glx, gly, glwidth, 48*s);
-		}
-		else
-		{
+		s = scr_uiscale.value;
+		if (cl.gametype == GAME_DEATHMATCH) {
+			GL_OrthoMatrix(0, glwidth / s, 48, 0, -99999, 99999);
+			GL_Viewport(glx, gly, glwidth, 48*s);
+		} else {
 			GL_OrthoMatrix (0, 320, 48, 0, -99999, 99999);
-			GL_Viewport (glx + (glwidth - 320*s) / 2, gly, 320*s, 48*s);
+			GL_Viewport(glx + (glwidth - 320*s) / 2, gly, 320*s, 48*s);
 		}
 		break;
 	case CANVAS_WARPIMAGE:
-		GL_OrthoMatrix (0, 128, 0, 128, -99999, 99999);
-		GL_Viewport (glx, gly+glheight-WARPIMAGESIZE, WARPIMAGESIZE, WARPIMAGESIZE);
+		GL_OrthoMatrix(0, 128, 0, 128, -99999, 99999);
+		GL_Viewport(glx, gly+glheight-WARPIMAGESIZE, WARPIMAGESIZE, WARPIMAGESIZE);
 		break;
 	case CANVAS_CROSSHAIR: //0,0 is center of viewport
-		s = CLAMP (1.0, scr_crosshairscale.value, 10.0);
-		GL_OrthoMatrix (scr_vrect.width/-2/s, scr_vrect.width/2/s, scr_vrect.height/2/s, scr_vrect.height/-2/s, -99999, 99999);
-		GL_Viewport (scr_vrect.x, glheight - scr_vrect.y - scr_vrect.height, scr_vrect.width & ~1, scr_vrect.height & ~1);
+		s = CLAMP(1.0, scr_crosshairscale.value, 10.0);
+		GL_OrthoMatrix(scr_vrect.width/-2/s, scr_vrect.width/2/s, scr_vrect.height/2/s, scr_vrect.height/-2/s, -99999, 99999);
+		GL_Viewport(scr_vrect.x, glheight - scr_vrect.y - scr_vrect.height, scr_vrect.width & ~1, scr_vrect.height & ~1);
 		break;
 	case CANVAS_BOTTOMLEFT: //used by devstats
 		s = (float)glwidth/vid.conwidth; //use console scale
@@ -920,11 +916,11 @@ void GL_SetCanvas (canvastype newcanvas)
 		break;
 	case CANVAS_TOPRIGHT: //used by disc
 		s = 1;
-		GL_OrthoMatrix (0, 320, 200, 0, -99999, 99999);
-		GL_Viewport (glx+glwidth-320*s, gly+glheight-200*s, 320*s, 200*s);
+		GL_OrthoMatrix(0, 320, 200, 0, -99999, 99999);
+		GL_Viewport(glx+glwidth-320*s, gly+glheight-200*s, 320*s, 200*s);
 		break;
 	default:
-		Sys_Error ("GL_SetCanvas: bad canvas type");
+		Sys_Error("GL_SetCanvas: bad canvas type");
 	}
 }
 
@@ -974,7 +970,7 @@ void GL_Set2D (void)
 		image_barriers[1].subresourceRange.layerCount = 1;
 
 		vkCmdPipelineBarrier(vulkan_globals.command_buffer, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 0, 0, NULL, 0, NULL, 2, image_barriers);
-		
+
 		const uint32_t screen_size[2] = { vid.width, vid.height };
 		const float aspect_ratio_time[2] = { (float)vid.width / (float)vid.height, cl.time };
 		vkCmdPushConstants(vulkan_globals.command_buffer, vulkan_globals.screen_warp_pipeline_layout, VK_SHADER_STAGE_COMPUTE_BIT, 0, 2 * sizeof(uint32_t), screen_size);

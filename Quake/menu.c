@@ -288,17 +288,20 @@ void M_Main_Key (int key)
 		break;
 
 	case K_DOWNARROW:
+	case 's':
 		S_LocalSound ("misc/menu1.wav");
 		if (++m_main_cursor >= MAIN_ITEMS)
 			m_main_cursor = 0;
 		break;
 
 	case K_UPARROW:
+	case 'w':
 		S_LocalSound ("misc/menu1.wav");
 		if (--m_main_cursor < 0)
 			m_main_cursor = MAIN_ITEMS - 1;
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -370,6 +373,7 @@ void M_SinglePlayer_Key (int key)
 		M_Menu_Main_f ();
 		break;
 
+	case 's':
 	case K_DOWNARROW:
 		S_LocalSound ("misc/menu1.wav");
 		if (++m_singleplayer_cursor >= SINGLEPLAYER_ITEMS)
@@ -383,6 +387,7 @@ void M_SinglePlayer_Key (int key)
 		break;
 
 	case K_ENTER:
+	case K_SPACE:
 	case K_KP_ENTER:
 	case K_ABUTTON:
 		m_entersound = true;
@@ -522,6 +527,7 @@ void M_Load_Key (int k)
 		M_Menu_SinglePlayer_f ();
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -540,6 +546,8 @@ void M_Load_Key (int k)
 		Cbuf_AddText (va ("load s%i\n", load_cursor) );
 		return;
 
+	case 'w':
+	case 'a':
 	case K_UPARROW:
 	case K_LEFTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -548,6 +556,8 @@ void M_Load_Key (int k)
 			load_cursor = MAX_SAVEGAMES-1;
 		break;
 
+	case 's':
+	case 'd':
 	case K_DOWNARROW:
 	case K_RIGHTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -568,6 +578,7 @@ void M_Save_Key (int k)
 		M_Menu_SinglePlayer_f ();
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -577,6 +588,8 @@ void M_Save_Key (int k)
 		Cbuf_AddText (va("save s%i\n", load_cursor));
 		return;
 
+	case 'w':
+	case 'a':
 	case K_UPARROW:
 	case K_LEFTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -585,6 +598,8 @@ void M_Save_Key (int k)
 			load_cursor = MAX_SAVEGAMES-1;
 		break;
 
+	case 's':
+	case 'd':
 	case K_DOWNARROW:
 	case K_RIGHTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -640,18 +655,21 @@ void M_MultiPlayer_Key (int key)
 		M_Menu_Main_f ();
 		break;
 
+	case 's':
 	case K_DOWNARROW:
 		S_LocalSound ("misc/menu1.wav");
 		if (++m_multiplayer_cursor >= MULTIPLAYER_ITEMS)
 			m_multiplayer_cursor = 0;
 		break;
 
+	case 'w':
 	case K_UPARROW:
 		S_LocalSound ("misc/menu1.wav");
 		if (--m_multiplayer_cursor < 0)
 			m_multiplayer_cursor = MULTIPLAYER_ITEMS - 1;
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -740,22 +758,23 @@ void M_Setup_Draw (void)
 }
 
 
-void M_Setup_Key (int k)
-{
-	switch (k)
-	{
+void M_Setup_Key(int k) {
+	switch (k) {
 	case K_ESCAPE:
 	case K_BBUTTON:
-		M_Menu_MultiPlayer_f ();
+		M_Menu_MultiPlayer_f();
 		break;
 
+	case 'w':
 	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		setup_cursor--;
-		if (setup_cursor < 0)
+		if (setup_cursor < 0) {
 			setup_cursor = NUM_SETUP_CMDS-1;
+		}
 		break;
 
+	case 's':
 	case K_DOWNARROW:
 		S_LocalSound ("misc/menu1.wav");
 		setup_cursor++;
@@ -763,6 +782,7 @@ void M_Setup_Key (int k)
 			setup_cursor = 0;
 		break;
 
+	case 'a':
 	case K_LEFTARROW:
 		if (setup_cursor < 2)
 			return;
@@ -772,6 +792,8 @@ void M_Setup_Key (int k)
 		if (setup_cursor == 3)
 			setup_bottom = setup_bottom - 1;
 		break;
+
+	case 'd':
 	case K_RIGHTARROW:
 		if (setup_cursor < 2)
 			return;
@@ -783,6 +805,7 @@ forward:
 			setup_bottom = setup_bottom + 1;
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -794,38 +817,36 @@ forward:
 
 		// setup_cursor == 4 (OK)
 		if (Q_strcmp(cl_name.string, setup_myname) != 0)
-			Cbuf_AddText ( va ("name \"%s\"\n", setup_myname) );
+			Cbuf_AddText(va("name \"%s\"\n", setup_myname));
 		if (Q_strcmp(hostname.string, setup_hostname) != 0)
 			Cvar_Set("hostname", setup_hostname);
 		if (setup_top != setup_oldtop || setup_bottom != setup_oldbottom)
-			Cbuf_AddText( va ("color %i %i\n", setup_top, setup_bottom) );
+			Cbuf_AddText(va("color %i %i\n", setup_top, setup_bottom));
 		m_entersound = true;
-		M_Menu_MultiPlayer_f ();
+		M_Menu_MultiPlayer_f();
 		break;
 
 	case K_BACKSPACE:
-		if (setup_cursor == 0)
-		{
-			if (strlen(setup_hostname))
-				setup_hostname[strlen(setup_hostname)-1] = 0;
+		if (setup_cursor == 0 && strlen(setup_hostname)) {
+			setup_hostname[strlen(setup_hostname)-1] = 0;
 		}
 
-		if (setup_cursor == 1)
-		{
-			if (strlen(setup_myname))
-				setup_myname[strlen(setup_myname)-1] = 0;
+		if (setup_cursor == 1 && strlen(setup_myname)) {
+			setup_myname[strlen(setup_myname)-1] = 0;
 		}
 		break;
 	}
 
-	if (setup_top > 13)
+	if (setup_top > 13) {
 		setup_top = 0;
-	if (setup_top < 0)
+	} else if (setup_top < 0) {
 		setup_top = 13;
-	if (setup_bottom > 13)
+	}
+	if (setup_bottom > 13) {
 		setup_bottom = 0;
-	if (setup_bottom < 0)
+	} else if (setup_bottom < 0) {
 		setup_bottom = 13;
+	}
 }
 
 
@@ -891,7 +912,7 @@ void M_Menu_Net_f (void)
 	if (m_net_cursor >= m_net_items)
 		m_net_cursor = 0;
 	m_net_cursor--;
-	M_Net_Key (K_DOWNARROW);
+	M_Net_Key(K_DOWNARROW);
 }
 
 
@@ -942,18 +963,21 @@ again:
 		M_Menu_MultiPlayer_f ();
 		break;
 
+	case 's':
 	case K_DOWNARROW:
 		S_LocalSound ("misc/menu1.wav");
 		if (++m_net_cursor >= m_net_items)
 			m_net_cursor = 0;
 		break;
 
+	case 'w':
 	case K_UPARROW:
 		S_LocalSound ("misc/menu1.wav");
 		if (--m_net_cursor < 0)
 			m_net_cursor = m_net_items - 1;
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -974,35 +998,28 @@ again:
 enum
 {
 	OPT_CUSTOMIZE = 0,
-	OPT_CONSOLE,	// 1
-	OPT_DEFAULTS,	// 2
-	OPT_SCALE,
+	OPT_MOUSESPEED,
+	OPT_ALWAYRUN,
+	OPT_INVMOUSE,
+	OPT_HIGHFOV,
+	//OPT_VIDEO,
+	//OPT_SCALE,
 	OPT_SCRSIZE,
 	OPT_GAMMA,
 	OPT_CONTRAST,
-	OPT_MOUSESPEED,
 	OPT_SBALPHA,
 	OPT_SNDVOL,
 	OPT_MUSICVOL,
 	OPT_MUSICEXT,
-	OPT_ALWAYRUN,
-	OPT_INVMOUSE,
-	OPT_ALWAYSMLOOK,
-	OPT_LOOKSPRING,
-	OPT_LOOKSTRAFE,
+	//OPT_ALWAYSMLOOK,
+	//OPT_LOOKSPRING,
+	//OPT_LOOKSTRAFE,
 //#ifdef _WIN32
 //	OPT_USEMOUSE,
 //#endif
-	OPT_VIDEO,	// This is the last before OPTIONS_ITEMS
+	OPT_CONSOLE,
+	OPT_DEFAULTS,
 	OPTIONS_ITEMS
-};
-
-enum
-{
-	ALWAYSRUN_OFF = 0,
-	ALWAYSRUN_VANILLA,
-	ALWAYSRUN_QUAKESPASM,
-	ALWAYSRUN_ITEMS
 };
 
 #define	SLIDER_RANGE	10
@@ -1018,7 +1035,7 @@ void M_Menu_Options_f (void)
 }
 
 
-void M_AdjustSliders (int dir)
+void M_AdjustSliders(int dir)
 {
 	int	curr_alwaysrun, target_alwaysrun;
 	float	f, l;
@@ -1027,15 +1044,13 @@ void M_AdjustSliders (int dir)
 
 	switch (options_cursor)
 	{
+		/*
 	case OPT_SCALE:	// console and menu scale
-		l = ((vid.width + 31) / 32) / 10.0;
-		f = scr_conscale.value + dir * .1;
-		if (f < 1)	f = 1;
-		else if(f > l)	f = l;
-		Cvar_SetValue ("scr_conscale", f);
-		Cvar_SetValue ("scr_menuscale", f);
-		Cvar_SetValue ("scr_sbarscale", f);
+		l = vid.height / 240.0;
+		f = CLAMP(1, scr_uiscale.value + dir * .5, l);
+		Cvar_SetValue ("scr_uiscale", f);
 		break;
+		*/
 	case OPT_SCRSIZE:	// screen size
 		f = scr_viewsize.value + dir * 10;
 		if (f > 120)	f = 120;
@@ -1082,40 +1097,18 @@ void M_AdjustSliders (int dir)
 		Cvar_SetValue ("volume", f);
 		break;
 
+	case OPT_HIGHFOV:	// "Quake Pro" fov
+		Cvar_Set("fov", scr_fov.value > 90 ? "90" : "110");
+		break;
+
 	case OPT_ALWAYRUN:	// always run
-		if (cl_alwaysrun.value)
-			curr_alwaysrun = ALWAYSRUN_QUAKESPASM;
-		else if (cl_forwardspeed.value > 200)
-			curr_alwaysrun = ALWAYSRUN_VANILLA;
-		else
-			curr_alwaysrun = ALWAYSRUN_OFF;
-			
-		target_alwaysrun = (ALWAYSRUN_ITEMS + curr_alwaysrun + dir) % ALWAYSRUN_ITEMS;
-			
-		if (target_alwaysrun == ALWAYSRUN_VANILLA)
-		{
-			Cvar_SetValue ("cl_alwaysrun", 0);
-			Cvar_SetValue ("cl_forwardspeed", 400);
-			Cvar_SetValue ("cl_backspeed", 400);
-		}
-		else if (target_alwaysrun == ALWAYSRUN_QUAKESPASM)
-		{
-			Cvar_SetValue ("cl_alwaysrun", 1);
-			Cvar_SetValue ("cl_forwardspeed", 200);
-			Cvar_SetValue ("cl_backspeed", 200);
-		}
-		else // ALWAYSRUN_OFF
-		{
-			Cvar_SetValue ("cl_alwaysrun", 0);
-			Cvar_SetValue ("cl_forwardspeed", 200);
-			Cvar_SetValue ("cl_backspeed", 200);
-		}
+		Cvar_Set("cl_alwaysrun", cl_alwaysrun.value ? "0" : "1");
 		break;
 
 	case OPT_INVMOUSE:	// invert mouse
 		Cvar_SetValue ("m_pitch", -m_pitch.value);
 		break;
-
+/*
 	case OPT_ALWAYSMLOOK:
 		if (in_mlook.state & 1)
 			Cbuf_AddText("-mlook");
@@ -1130,6 +1123,7 @@ void M_AdjustSliders (int dir)
 	case OPT_LOOKSTRAFE:	// lookstrafe
 		Cvar_Set ("lookstrafe", lookstrafe.value ? "0" : "1");
 		break;
+*/
 	}
 }
 
@@ -1165,168 +1159,173 @@ void M_DrawCheckbox (int x, int y, int on)
 
 void M_Options_Draw (void)
 {
-	float		r, l;
-	qpic_t	*p;
+	float r, l;
+	qpic_t *p;
 
-	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
-	p = Draw_CachePic ("gfx/p_option.lmp");
-	M_DrawPic ( (320-p->width)/2, 4, p);
+	M_DrawTransPic(16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
+	p = Draw_CachePic("gfx/p_option.lmp");
+	M_DrawPic((320 - p->width)/2, 4, p);
 
 	// Draw the items in the order of the enum defined above:
 	// OPT_CUSTOMIZE:
-	M_Print (16, 32,			"              Controls");
+	M_Print (16, 32,                    "              Controls");
 	// OPT_CONSOLE:
-	M_Print (16, 32 + 8*OPT_CONSOLE,	"          Goto console");
+	M_Print (16, 32 + 8*OPT_CONSOLE,    "          Goto console");
 	// OPT_DEFAULTS:
-	M_Print (16, 32 + 8*OPT_DEFAULTS,	"          Reset config");
-
+	M_Print (16, 32 + 8*OPT_DEFAULTS,   "          Reset config");
+/*
 	// OPT_SCALE:
-	M_Print (16, 32 + 8*OPT_SCALE,		"                 Scale");
-	l = (vid.width / 320.0) - 1;
-	r = l > 0 ? (scr_conscale.value - 1) / l : 0;
+	M_Print (16, 32 + 8*OPT_SCALE,      "                 Scale");
+	l = (vid.height / 240.0) - 1;
+	r = l > 0 ? (scr_uiscale.value - 1) / l : 0;
 	M_DrawSlider (220, 32 + 8*OPT_SCALE, r);
+*/
+	// OPT_HIGHFOV:
+	M_Print (16, 32 + 8*OPT_HIGHFOV,    "               Pro FOV");
+	M_DrawCheckbox(220, 32 + 8*OPT_HIGHFOV, scr_fov.value > 90);
 
 	// OPT_SCRSIZE:
-	M_Print (16, 32 + 8*OPT_SCRSIZE,	"           Screen size");
+	M_Print (16, 32 + 8*OPT_SCRSIZE,    "           Screen size");
 	r = (scr_viewsize.value - 30) / (120 - 30);
 	M_DrawSlider (220, 32 + 8*OPT_SCRSIZE, r);
 
 	// OPT_GAMMA:
-	M_Print (16, 32 + 8*OPT_GAMMA,		"            Brightness");
+	M_Print (16, 32 + 8*OPT_GAMMA,      "            Brightness");
 	r = (1.0 - vid_gamma.value) / 0.5;
 	M_DrawSlider (220, 32 + 8*OPT_GAMMA, r);
 
 	// OPT_CONTRAST:
-	M_Print (16, 32 + 8*OPT_CONTRAST,	"              Contrast");
+	M_Print (16, 32 + 8*OPT_CONTRAST,   "              Contrast");
 	r = vid_contrast.value - 1.0;
 	M_DrawSlider (220, 32 + 8*OPT_CONTRAST, r);
-	
+
 	// OPT_MOUSESPEED:
-	M_Print (16, 32 + 8*OPT_MOUSESPEED,	"           Mouse Speed");
+	M_Print (16, 32 + 8*OPT_MOUSESPEED, "      Look sensitivity");
 	r = (sensitivity.value - 1)/10;
 	M_DrawSlider (220, 32 + 8*OPT_MOUSESPEED, r);
 
 	// OPT_SBALPHA:
-	M_Print (16, 32 + 8*OPT_SBALPHA,	"       Statusbar alpha");
-	r = (1.0 - scr_sbaralpha.value) ; // scr_sbaralpha range is 1.0 to 0.0
-	M_DrawSlider (220, 32 + 8*OPT_SBALPHA, r);
+	M_Print(16, 32 + 8*OPT_SBALPHA,     "       Statusbar alpha");
+	r = 1 - scr_sbaralpha.value; // scr_sbaralpha range is 1.0 to 0.0
+	M_DrawSlider(220, 32 + 8*OPT_SBALPHA, r);
 
 	// OPT_SNDVOL:
-	M_Print (16, 32 + 8*OPT_SNDVOL,		"          Sound Volume");
+	M_Print(16, 32 + 8*OPT_SNDVOL,      "          Sound volume");
 	r = sfxvolume.value;
-	M_DrawSlider (220, 32 + 8*OPT_SNDVOL, r);
+	M_DrawSlider(220, 32 + 8*OPT_SNDVOL, r);
 
 	// OPT_MUSICVOL:
-	M_Print (16, 32 + 8*OPT_MUSICVOL,	"          Music Volume");
+	M_Print(16, 32 + 8*OPT_MUSICVOL,    "          Music volume");
 	r = bgmvolume.value;
-	M_DrawSlider (220, 32 + 8*OPT_MUSICVOL, r);
+	M_DrawSlider(220, 32 + 8*OPT_MUSICVOL, r);
 
 	// OPT_MUSICEXT:
-	M_Print (16, 32 + 8*OPT_MUSICEXT,	"        External Music");
-	M_DrawCheckbox (220, 32 + 8*OPT_MUSICEXT, bgm_extmusic.value);
+	M_Print(16, 32 + 8*OPT_MUSICEXT,    "        External music");
+	M_DrawCheckbox(220, 32 + 8*OPT_MUSICEXT, bgm_extmusic.value);
 
 	// OPT_ALWAYRUN:
-	M_Print (16, 32 + 8*OPT_ALWAYRUN,	"            Always Run");
-	if (cl_alwaysrun.value)
-		M_Print (220, 32 + 8*OPT_ALWAYRUN, "quakespasm");
-	else if (cl_forwardspeed.value > 200.0)
-		M_Print (220, 32 + 8*OPT_ALWAYRUN, "vanilla");
-	else
-		M_Print (220, 32 + 8*OPT_ALWAYRUN, "off");
+	M_Print(16, 32 + 8*OPT_ALWAYRUN,    "            Always run");
+	M_DrawCheckbox(220, 32 + 8*OPT_ALWAYRUN, cl_alwaysrun.value);
 
 	// OPT_INVMOUSE:
-	M_Print (16, 32 + 8*OPT_INVMOUSE,	"          Invert Mouse");
-	M_DrawCheckbox (220, 32 + 8*OPT_INVMOUSE, m_pitch.value < 0);
-
+	M_Print(16, 32 + 8*OPT_INVMOUSE,    "          Invert mouse");
+	M_DrawCheckbox(220, 32 + 8*OPT_INVMOUSE, m_pitch.value < 0);
+/*
 	// OPT_ALWAYSMLOOK:
-	M_Print (16, 32 + 8*OPT_ALWAYSMLOOK,	"            Mouse Look");
-	M_DrawCheckbox (220, 32 + 8*OPT_ALWAYSMLOOK, in_mlook.state & 1);
+	M_Print(16, 32 + 8*OPT_ALWAYSMLOOK, "            Mouse Look");
+	M_DrawCheckbox(220, 32 + 8*OPT_ALWAYSMLOOK, in_mlook.state & 1);
 
 	// OPT_LOOKSPRING:
-	M_Print (16, 32 + 8*OPT_LOOKSPRING,	"            Lookspring");
-	M_DrawCheckbox (220, 32 + 8*OPT_LOOKSPRING, lookspring.value);
+	M_Print(16, 32 + 8*OPT_LOOKSPRING,  "            Lookspring");
+	M_DrawCheckbox(220, 32 + 8*OPT_LOOKSPRING, lookspring.value);
 
 	// OPT_LOOKSTRAFE:
-	M_Print (16, 32 + 8*OPT_LOOKSTRAFE,	"            Lookstrafe");
-	M_DrawCheckbox (220, 32 + 8*OPT_LOOKSTRAFE, lookstrafe.value);
+	M_Print(16, 32 + 8*OPT_LOOKSTRAFE,  "            Lookstrafe");
+	M_DrawCheckbox(220, 32 + 8*OPT_LOOKSTRAFE, lookstrafe.value);
 
 	// OPT_VIDEO:
-	if (vid_menudrawfn)
-		M_Print (16, 32 + 8*OPT_VIDEO,	"         Video Options");
-
+	if (vid_menudrawfn) {
+		M_Print(16, 32 + 8*OPT_VIDEO,   "         Video options");
+	}
+*/
 // cursor
-	M_DrawCharacter (200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
+	M_DrawCharacter(200, 32 + options_cursor*8, 12+((int)(realtime*4)&1));
 }
 
 
-void M_Options_Key (int k)
-{
-	switch (k)
-	{
+void M_Options_Key(int k) {
+	switch (k) {
 	case K_ESCAPE:
 	case K_BBUTTON:
-		M_Menu_Main_f ();
+		M_Menu_Main_f();
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
 		m_entersound = true;
-		switch (options_cursor)
-		{
+		switch (options_cursor) {
 		case OPT_CUSTOMIZE:
-			M_Menu_Keys_f ();
+			M_Menu_Keys_f();
 			break;
 		case OPT_CONSOLE:
 			m_state = m_none;
-			Con_ToggleConsole_f ();
+			Con_ToggleConsole_f();
 			break;
 		case OPT_DEFAULTS:
 			if (SCR_ModalMessage("This will reset all controls\n"
-					"and stored cvars. Continue? (y/n)\n", 15.0f))
-			{
-				Cbuf_AddText ("resetcfg\n");
-				Cbuf_AddText ("exec default.cfg\n");
+					"and stored cvars. Continue? (y/n)\n", 15.0f)) {
+				Cbuf_AddText("resetcfg\n");
+				Cbuf_AddText("exec default.cfg\n");
 			}
 			break;
+			/*
 		case OPT_VIDEO:
-			M_Menu_Video_f ();
+			M_Menu_Video_f();
 			break;
+			*/
 		default:
-			M_AdjustSliders (1);
+			M_AdjustSliders(1);
 			break;
 		}
 		return;
 
+	case 'w':
 	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		options_cursor--;
-		if (options_cursor < 0)
+		if (options_cursor < 0) {
 			options_cursor = OPTIONS_ITEMS-1;
+		}
 		break;
 
+	case 's':
 	case K_DOWNARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		options_cursor++;
-		if (options_cursor >= OPTIONS_ITEMS)
+		if (options_cursor >= OPTIONS_ITEMS) {
 			options_cursor = 0;
+		}
 		break;
 
+	case 'a':
 	case K_LEFTARROW:
-		M_AdjustSliders (-1);
+		M_AdjustSliders(-1);
 		break;
 
+	case 'd':
 	case K_RIGHTARROW:
-		M_AdjustSliders (1);
+		M_AdjustSliders(1);
 		break;
 	}
 
-	if (options_cursor == OPTIONS_ITEMS - 1 && vid_menudrawfn == NULL)
-	{
-		if (k == K_UPARROW)
+	if (options_cursor == OPTIONS_ITEMS - 1 && vid_menudrawfn == NULL) {
+		if (k == K_UPARROW || k == 'w') {
 			options_cursor = OPTIONS_ITEMS - 2;
-		else
+		} else {
 			options_cursor = 0;
+		}
 	}
 }
 
@@ -1335,25 +1334,16 @@ void M_Options_Key (int k)
 
 const char *bindnames[][2] =
 {
-	{"+attack",		"attack"},
-	{"impulse 10",		"next weapon"},
-	{"impulse 12",		"prev weapon"},
-	{"+jump",		"jump / swim up"},
-	{"+forward",		"walk forward"},
-	{"+back",		"backpedal"},
-	{"+left",		"turn left"},
-	{"+right",		"turn right"},
-	{"+speed",		"run"},
-	{"+moveleft",		"step left"},
-	{"+moveright",		"step right"},
-	{"+strafe",		"sidestep"},
-	{"+lookup",		"look up"},
-	{"+lookdown",		"look down"},
-	{"centerview",		"center view"},
-	{"+mlook",		"mouse look"},
-	{"+klook",		"keyboard look"},
-	{"+moveup",		"swim up"},
-	{"+movedown",		"swim down"}
+	{"+attack",    "attack"},
+	{"impulse 10", "next weapon"},
+	{"impulse 12", "prev weapon"},
+	{"+jump",      "jump / swim up"},
+	{"+forward",   "walk forward"},
+	{"+back",      "backpedal"},
+	{"+speed",     "run"},
+	{"+moveleft",  "step left"},
+	{"+moveright", "step right"},
+	{"+movedown",  "swim down"}
 };
 
 #define	NUMCOMMANDS	(sizeof(bindnames)/sizeof(bindnames[0]))
@@ -1370,47 +1360,39 @@ void M_Menu_Keys_f (void)
 }
 
 
-void M_FindKeysForCommand (const char *command, int *threekeys)
-{
-	int		count;
-	int		j;
-	int		l;
-	char	*b;
+void M_FindKeysForCommand(const char *command, int *threekeys) {
+	uint_fast8_t count = 0;
+	uint_fast8_t l = strlen(command);
 
 	threekeys[0] = threekeys[1] = threekeys[2] = -1;
-	l = strlen(command);
-	count = 0;
 
-	for (j = 0; j < MAX_KEYS; j++)
-	{
-		b = keybindings[j];
-		if (!b)
+	for (int j = 0; j < MAX_KEYS; j++) {
+		char *b = keybindings[j];
+		if (!b) {
 			continue;
-		if (!strncmp (b, command, l) )
-		{
+		}
+		if (!strncmp(b, command, l)) {
 			threekeys[count] = j;
 			count++;
-			if (count == 3)
+			if (count == 3) {
 				break;
+			}
 		}
 	}
 }
 
-void M_UnbindCommand (const char *command)
-{
-	int		j;
-	int		l;
-	char	*b;
+void M_UnbindCommand(const char *command) {
+	uint_fast8_t l = strlen(command);
 
-	l = strlen(command);
-
-	for (j = 0; j < MAX_KEYS; j++)
+	for (int j = 0; j < MAX_KEYS; j++)
 	{
-		b = keybindings[j];
-		if (!b)
+		char *b = keybindings[j];
+		if (!b) {
 			continue;
-		if (!strncmp (b, command, l) )
+		}
+		if (!strncmp(b, command, l)) {
 			Key_SetBinding (j, NULL);
+		}
 	}
 }
 
@@ -1497,6 +1479,8 @@ void M_Keys_Key (int k)
 		M_Menu_Options_f ();
 		break;
 
+	case 'w':
+	case 'a':
 	case K_LEFTARROW:
 	case K_UPARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -1505,6 +1489,8 @@ void M_Keys_Key (int k)
 			keys_cursor = NUMCOMMANDS-1;
 		break;
 
+	case 's':
+	case 'd':
 	case K_DOWNARROW:
 	case K_RIGHTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -1513,6 +1499,7 @@ void M_Keys_Key (int k)
 			keys_cursor = 0;
 		break;
 
+	case K_SPACE:
 	case K_ENTER:		// go into bind mode
 	case K_KP_ENTER:
 	case K_ABUTTON:
@@ -1535,32 +1522,28 @@ void M_Keys_Key (int k)
 //=============================================================================
 /* VIDEO MENU */
 
-void M_Menu_Video_f (void)
-{
-	(*vid_menucmdfn) (); //johnfitz
+void M_Menu_Video_f(void) {
+	(*vid_menucmdfn)(); //johnfitz
 }
 
 
-void M_Video_Draw (void)
-{
-	(*vid_menudrawfn) ();
+void M_Video_Draw(void) {
+	(*vid_menudrawfn)();
 }
 
 
-void M_Video_Key (int key)
-{
-	(*vid_menukeyfn) (key);
+void M_Video_Key(int key) {
+	(*vid_menukeyfn)(key);
 }
 
 //=============================================================================
 /* HELP MENU */
 
-int		help_page;
+int help_page;
 #define	NUM_HELP_PAGES	6
 
 
-void M_Menu_Help_f (void)
-{
+void M_Menu_Help_f(void) {
 	IN_Deactivate(modestate == MS_WINDOWED);
 	key_dest = key_menu;
 	m_state = m_help;
@@ -1570,33 +1553,36 @@ void M_Menu_Help_f (void)
 
 
 
-void M_Help_Draw (void)
-{
-	M_DrawPic (0, 0, Draw_CachePic ( va("gfx/help%i.lmp", help_page)) );
+void M_Help_Draw (void) {
+	M_DrawPic(0, 0, Draw_CachePic(va("gfx/help%i.lmp", help_page)));
 }
 
 
-void M_Help_Key (int key)
-{
-	switch (key)
-	{
+void M_Help_Key(int key) {
+	switch (key) {
 	case K_ESCAPE:
 	case K_BBUTTON:
 		M_Menu_Main_f ();
 		break;
 
+	case 'w':
+	case 'a':
 	case K_UPARROW:
 	case K_RIGHTARROW:
 		m_entersound = true;
-		if (++help_page >= NUM_HELP_PAGES)
+		if (++help_page >= NUM_HELP_PAGES) {
 			help_page = 0;
+		}
 		break;
 
+	case 's':
+	case 'd':
 	case K_DOWNARROW:
 	case K_LEFTARROW:
 		m_entersound = true;
-		if (--help_page < 0)
+		if (--help_page < 0) {
 			help_page = NUM_HELP_PAGES-1;
+		}
 		break;
 	}
 
@@ -1605,35 +1591,30 @@ void M_Help_Key (int key)
 //=============================================================================
 /* QUIT MENU */
 
-int		msgNumber;
-enum m_state_e	m_quit_prevstate;
-qboolean	wasInMenus;
+int msgNumber;
+enum m_state_e m_quit_prevstate;
+qboolean wasInMenus;
 
-void M_Menu_Quit_f (void)
-{
-	if (m_state == m_quit)
+void M_Menu_Quit_f(void) {
+	if (m_state == m_quit) {
 		return;
-	wasInMenus = (key_dest == key_menu);
+	}
+	wasInMenus = key_dest == key_menu;
 	IN_Deactivate(modestate == MS_WINDOWED);
 	key_dest = key_menu;
 	m_quit_prevstate = m_state;
 	m_state = m_quit;
 	m_entersound = true;
-	msgNumber = rand()&7;
+	msgNumber = rand() & 7;
 }
 
 
-void M_Quit_Key (int key)
-{
-	if (key == K_ESCAPE)
-	{
-		if (wasInMenus)
-		{
+void M_Quit_Key(int key) {
+	if (key == K_ESCAPE) {
+		if (wasInMenus) {
 			m_state = m_quit_prevstate;
 			m_entersound = true;
-		}
-		else
-		{
+		} else {
 			IN_Activate();
 			key_dest = key_game;
 			m_state = m_none;
@@ -1642,19 +1623,14 @@ void M_Quit_Key (int key)
 }
 
 
-void M_Quit_Char (int key)
-{
-	switch (key)
-	{
+void M_Quit_Char(int key) {
+	switch (key) {
 	case 'n':
 	case 'N':
-		if (wasInMenus)
-		{
+		if (wasInMenus) {
 			m_state = m_quit_prevstate;
 			m_entersound = true;
-		}
-		else
-		{
+		} else {
 			IN_Activate();
 			key_dest = key_game;
 			m_state = m_none;
@@ -1665,7 +1641,7 @@ void M_Quit_Char (int key)
 	case 'Y':
 		IN_Deactivate(modestate == MS_WINDOWED);
 		key_dest = key_console;
-		Host_Quit_f ();
+		Host_Quit_f();
 		break;
 
 	default:
@@ -1675,21 +1651,18 @@ void M_Quit_Char (int key)
 }
 
 
-qboolean M_Quit_TextEntry (void)
-{
+qboolean M_Quit_TextEntry(void) {
 	return true;
 }
 
 
-void M_Quit_Draw (void) //johnfitz -- modified for new quit message
-{
+void M_Quit_Draw(void) { //johnfitz -- modified for new quit message
 	char	msg1[40];
 	char	msg2[] = "by Axel Gneiting"; /* msg2/msg3 are mostly [40] */
 	char	msg3[] = "Press y to quit";
 	int		boxlen;
 
-	if (wasInMenus)
-	{
+	if (wasInMenus) {
 		m_state = m_quit_prevstate;
 		m_recursiveDraw = true;
 		M_Draw ();
@@ -1702,41 +1675,43 @@ void M_Quit_Draw (void) //johnfitz -- modified for new quit message
 	//width is even. Also, the width and lines values are for the interior of the box,
 	//but the x and y values include the border.
 	boxlen = q_max(strlen(msg1), q_max((sizeof(msg2)-1),(sizeof(msg3)-1))) + 1;
-	if (boxlen & 1) boxlen++;
-	M_DrawTextBox	(160-4*(boxlen+2), 76, boxlen, 4);
+	if (boxlen & 1) {
+		boxlen++;
+	}
+	M_DrawTextBox(160-4*(boxlen+2), 76, boxlen, 4);
 
 	//now do the text
-	M_Print			(160-4*strlen(msg1), 88, msg1);
-	M_Print			(160-4*(sizeof(msg2)-1), 96, msg2);
-	M_PrintWhite		(160-4*(sizeof(msg3)-1), 104, msg3);
+	M_Print(160-4*strlen(msg1), 88, msg1);
+	M_Print(160-4*(sizeof(msg2)-1), 96, msg2);
+	M_PrintWhite(160-4*(sizeof(msg3)-1), 104, msg3);
 }
 
 //=============================================================================
 /* LAN CONFIG MENU */
 
-int		lanConfig_cursor = -1;
-int		lanConfig_cursor_table [] = {72, 92, 124};
+int lanConfig_cursor = -1;
+int lanConfig_cursor_table [] = {72, 92, 124};
 #define NUM_LANCONFIG_CMDS	3
 
-int 	lanConfig_port;
-char	lanConfig_portname[6];
-char	lanConfig_joinname[22];
+uint_fast16_t lanConfig_port;
+char lanConfig_portname[6];
+char lanConfig_joinname[22];
 
-void M_Menu_LanConfig_f (void)
-{
+void M_Menu_LanConfig_f(void) {
 	IN_Deactivate(modestate == MS_WINDOWED);
 	key_dest = key_menu;
 	m_state = m_lanconfig;
 	m_entersound = true;
-	if (lanConfig_cursor == -1)
-	{
-		if (JoiningGame && TCPIPConfig)
+	if (lanConfig_cursor == -1) {
+		if (JoiningGame && TCPIPConfig) {
 			lanConfig_cursor = 2;
-		else
+		} else {
 			lanConfig_cursor = 1;
+		}
 	}
-	if (StartingGame && lanConfig_cursor == 2)
+	if (StartingGame && lanConfig_cursor == 2) {
 		lanConfig_cursor = 1;
+	}
 	lanConfig_port = DEFAULTnet_hostport;
 	sprintf(lanConfig_portname, "%u", lanConfig_port);
 
@@ -1745,104 +1720,108 @@ void M_Menu_LanConfig_f (void)
 }
 
 
-void M_LanConfig_Draw (void)
-{
-	qpic_t	*p;
-	int		basex;
-	const char	*startJoin;
-	const char	*protocol;
+void M_LanConfig_Draw(void) {
+	qpic_t *p;
+	int basex;
+	const char *startJoin;
+	const char *protocol;
 
-	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
-	p = Draw_CachePic ("gfx/p_multi.lmp");
+	M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
+	p = Draw_CachePic("gfx/p_multi.lmp");
 	basex = (320-p->width)/2;
-	M_DrawPic (basex, 4, p);
+	M_DrawPic(basex, 4, p);
 
-	if (StartingGame)
+	if (StartingGame) {
 		startJoin = "New Game";
-	else
+	} else {
 		startJoin = "Join Game";
-	if (IPXConfig)
+	}
+	if (IPXConfig) {
 		protocol = "IPX";
-	else
+	} else {
 		protocol = "TCP/IP";
-	M_Print (basex, 32, va ("%s - %s", startJoin, protocol));
+	}
+	M_Print(basex, 32, va("%s - %s", startJoin, protocol));
 	basex += 8;
 
 	M_Print (basex, 52, "Address:");
-	if (IPXConfig)
+	if (IPXConfig) {
 		M_Print (basex+9*8, 52, my_ipx_address);
-	else
+	} else {
 		M_Print (basex+9*8, 52, my_tcpip_address);
-
-	M_Print (basex, lanConfig_cursor_table[0], "Port");
-	M_DrawTextBox (basex+8*8, lanConfig_cursor_table[0]-8, 6, 1);
-	M_Print (basex+9*8, lanConfig_cursor_table[0], lanConfig_portname);
-
-	if (JoiningGame)
-	{
-		M_Print (basex, lanConfig_cursor_table[1], "Search for local games...");
-		M_Print (basex, 108, "Join game at:");
-		M_DrawTextBox (basex+8, lanConfig_cursor_table[2]-8, 22, 1);
-		M_Print (basex+16, lanConfig_cursor_table[2], lanConfig_joinname);
-	}
-	else
-	{
-		M_DrawTextBox (basex, lanConfig_cursor_table[1]-8, 2, 1);
-		M_Print (basex+8, lanConfig_cursor_table[1], "OK");
 	}
 
-	M_DrawCharacter (basex-8, lanConfig_cursor_table [lanConfig_cursor], 12+((int)(realtime*4)&1));
+	M_Print(basex, lanConfig_cursor_table[0], "Port");
+	M_DrawTextBox(basex+8*8, lanConfig_cursor_table[0]-8, 6, 1);
+	M_Print(basex+9*8, lanConfig_cursor_table[0], lanConfig_portname);
 
-	if (lanConfig_cursor == 0)
+	if (JoiningGame) {
+		M_Print(basex, lanConfig_cursor_table[1], "Search for local games...");
+		M_Print(basex, 108, "Join game at:");
+		M_DrawTextBox(basex+8, lanConfig_cursor_table[2]-8, 22, 1);
+		M_Print(basex+16, lanConfig_cursor_table[2], lanConfig_joinname);
+	} else {
+		M_DrawTextBox(basex, lanConfig_cursor_table[1]-8, 2, 1);
+		M_Print(basex+8, lanConfig_cursor_table[1], "OK");
+	}
+
+	M_DrawCharacter(basex-8, lanConfig_cursor_table [lanConfig_cursor], 12+((int)(realtime*4)&1));
+
+	if (lanConfig_cursor == 0) {
 		M_DrawCharacter (basex+9*8 + 8*strlen(lanConfig_portname), lanConfig_cursor_table [0], 10+((int)(realtime*4)&1));
+	}
 
-	if (lanConfig_cursor == 2)
+	if (lanConfig_cursor == 2) {
 		M_DrawCharacter (basex+16 + 8*strlen(lanConfig_joinname), lanConfig_cursor_table [2], 10+((int)(realtime*4)&1));
+	}
 
-	if (*m_return_reason)
+	if (*m_return_reason) {
 		M_PrintWhite (basex, 148, m_return_reason);
+	}
 }
 
 
-void M_LanConfig_Key (int key)
-{
-	int		l;
+void M_LanConfig_Key(int key) {
+	int l;
 
-	switch (key)
-	{
+	switch (key) {
 	case K_ESCAPE:
 	case K_BBUTTON:
 		M_Menu_Net_f ();
 		break;
 
+	case 'w':
 	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		lanConfig_cursor--;
-		if (lanConfig_cursor < 0)
+		if (lanConfig_cursor < 0) {
 			lanConfig_cursor = NUM_LANCONFIG_CMDS-1;
+		}
 		break;
 
+	case 's':
 	case K_DOWNARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		lanConfig_cursor++;
-		if (lanConfig_cursor >= NUM_LANCONFIG_CMDS)
+		if (lanConfig_cursor >= NUM_LANCONFIG_CMDS) {
 			lanConfig_cursor = 0;
+		}
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
-		if (lanConfig_cursor == 0)
+		if (lanConfig_cursor == 0) {
 			break;
+		}
 
 		m_entersound = true;
 
 		M_ConfigureNetSubsystem ();
 
-		if (lanConfig_cursor == 1)
-		{
-			if (StartingGame)
-			{
+		if (lanConfig_cursor == 1) {
+			if (StartingGame) {
 				M_Menu_GameOptions_f ();
 				break;
 			}
@@ -1850,8 +1829,7 @@ void M_LanConfig_Key (int key)
 			break;
 		}
 
-		if (lanConfig_cursor == 2)
-		{
+		if (lanConfig_cursor == 2) {
 			m_return_state = m_state;
 			m_return_onerror = true;
 			IN_Activate();
@@ -1864,57 +1842,50 @@ void M_LanConfig_Key (int key)
 		break;
 
 	case K_BACKSPACE:
-		if (lanConfig_cursor == 0)
-		{
-			if (strlen(lanConfig_portname))
-				lanConfig_portname[strlen(lanConfig_portname)-1] = 0;
+		if (lanConfig_cursor == 0 && strlen(lanConfig_portname)) {
+			lanConfig_portname[strlen(lanConfig_portname)-1] = 0;
 		}
-
-		if (lanConfig_cursor == 2)
-		{
-			if (strlen(lanConfig_joinname))
-				lanConfig_joinname[strlen(lanConfig_joinname)-1] = 0;
+		if (lanConfig_cursor == 2 && strlen(lanConfig_joinname)) {
+			lanConfig_joinname[strlen(lanConfig_joinname)-1] = 0;
 		}
 		break;
 	}
 
-	if (StartingGame && lanConfig_cursor == 2)
-	{
-		if (key == K_UPARROW)
+	if (StartingGame && lanConfig_cursor == 2) {
+		if (key == K_UPARROW) {
 			lanConfig_cursor = 1;
-		else
+		} else {
 			lanConfig_cursor = 0;
+		}
 	}
 
 	l =  Q_atoi(lanConfig_portname);
-	if (l > 65535)
+	if (l > 65535) {
 		l = lanConfig_port;
-	else
+	} else {
 		lanConfig_port = l;
+	}
 	sprintf(lanConfig_portname, "%u", lanConfig_port);
 }
 
 
-void M_LanConfig_Char (int key)
-{
-	int l;
+void M_LanConfig_Char(int key) {
+	uint_fast8_t l;
 
-	switch (lanConfig_cursor)
-	{
+	switch (lanConfig_cursor) {
 	case 0:
-		if (key < '0' || key > '9')
+		if (key < '0' || key > '9') {
 			return;
+		}
 		l = strlen(lanConfig_portname);
-		if (l < 5)
-		{
+		if (l < 5) {
 			lanConfig_portname[l+1] = 0;
 			lanConfig_portname[l] = key;
 		}
 		break;
 	case 2:
 		l = strlen(lanConfig_joinname);
-		if (l < 21)
-		{
+		if (l < 21) {
 			lanConfig_joinname[l+1] = 0;
 			lanConfig_joinname[l] = key;
 		}
@@ -1923,16 +1894,14 @@ void M_LanConfig_Char (int key)
 }
 
 
-qboolean M_LanConfig_TextEntry (void)
-{
-	return (lanConfig_cursor == 0 || lanConfig_cursor == 2);
+qboolean M_LanConfig_TextEntry(void) {
+	return lanConfig_cursor == 0 || lanConfig_cursor == 2;
 }
 
 //=============================================================================
 /* GAME OPTIONS MENU */
 
-typedef struct
-{
+typedef struct {
 	const char	*name;
 	const char	*description;
 } level_t;
@@ -2036,8 +2005,7 @@ level_t		roguelevels[] =
 	{"ctf1",    "Division of Change"}
 };
 
-typedef struct
-{
+typedef struct {
 	const char	*description;
 	int		firstLevel;
 	int		levels;
@@ -2075,22 +2043,23 @@ episode_t	rogueepisodes[] =
 	{"Deathmatch Arena", 16, 1}
 };
 
-int	startepisode;
-int	startlevel;
+int startepisode;
+int startlevel;
 int maxplayers;
 qboolean m_serverInfoMessage = false;
 double m_serverInfoMessageTime;
 
-void M_Menu_GameOptions_f (void)
-{
+void M_Menu_GameOptions_f(void) {
 	IN_Deactivate(modestate == MS_WINDOWED);
 	key_dest = key_menu;
 	m_state = m_gameoptions;
 	m_entersound = true;
-	if (maxplayers == 0)
+	if (maxplayers == 0) {
 		maxplayers = svs.maxclients;
-	if (maxplayers < 2)
+	}
+	if (maxplayers < 2) {
 		maxplayers = svs.maxclientslimit;
+	}
 }
 
 
@@ -2098,34 +2067,32 @@ int gameoptions_cursor_table[] = {40, 56, 64, 72, 80, 88, 96, 112, 120};
 #define	NUM_GAMEOPTIONS	9
 int		gameoptions_cursor;
 
-void M_GameOptions_Draw (void)
-{
-	qpic_t	*p;
-	int		x;
+void M_GameOptions_Draw(void) {
+	qpic_t *p;
+	int x;
 
-	M_DrawTransPic (16, 4, Draw_CachePic ("gfx/qplaque.lmp") );
-	p = Draw_CachePic ("gfx/p_multi.lmp");
-	M_DrawPic ( (320-p->width)/2, 4, p);
+	M_DrawTransPic(16, 4, Draw_CachePic("gfx/qplaque.lmp"));
+	p = Draw_CachePic("gfx/p_multi.lmp");
+	M_DrawPic((320-p->width)/2, 4, p);
 
-	M_DrawTextBox (152, 32, 10, 1);
-	M_Print (160, 40, "begin game");
+	M_DrawTextBox(152, 32, 10, 1);
+	M_Print(160, 40, "begin game");
 
-	M_Print (0, 56, "      Max players");
-	M_Print (160, 56, va("%i", maxplayers) );
+	M_Print(0, 56, "      Max players");
+	M_Print(160, 56, va("%i", maxplayers) );
 
-	M_Print (0, 64, "        Game Type");
-	if (coop.value)
+	M_Print(0, 64, "        Game Type");
+	if (coop.value) {
 		M_Print (160, 64, "Cooperative");
-	else
+	} else {
 		M_Print (160, 64, "Deathmatch");
+	}
 
-	M_Print (0, 72, "        Teamplay");
-	if (rogue)
-	{
+	M_Print(0, 72, "        Teamplay");
+	if (rogue) {
 		const char *msg;
 
-		switch((int)teamplay.value)
-		{
+		switch((int)teamplay.value) {
 			case 1: msg = "No Friendly Fire"; break;
 			case 2: msg = "Friendly Fire"; break;
 			case 3: msg = "Tag"; break;
@@ -2134,166 +2101,171 @@ void M_GameOptions_Draw (void)
 			case 6: msg = "Three Team CTF"; break;
 			default: msg = "Off"; break;
 		}
-		M_Print (160, 72, msg);
+		M_Print(160, 72, msg);
 	}
 	else
 	{
 		const char *msg;
 
-		switch((int)teamplay.value)
-		{
+		switch((int)teamplay.value) {
 			case 1: msg = "No Friendly Fire"; break;
 			case 2: msg = "Friendly Fire"; break;
 			default: msg = "Off"; break;
 		}
-		M_Print (160, 72, msg);
+		M_Print(160, 72, msg);
 	}
 
 	M_Print (0, 80, "            Skill");
-	if (skill.value == 0)
-		M_Print (160, 80, "Easy difficulty");
-	else if (skill.value == 1)
-		M_Print (160, 80, "Normal difficulty");
-	else if (skill.value == 2)
-		M_Print (160, 80, "Hard difficulty");
-	else
-		M_Print (160, 80, "Nightmare difficulty");
-
-	M_Print (0, 88, "       Frag Limit");
-	if (fraglimit.value == 0)
-		M_Print (160, 88, "none");
-	else
-		M_Print (160, 88, va("%i frags", (int)fraglimit.value));
-
-	M_Print (0, 96, "       Time Limit");
-	if (timelimit.value == 0)
-		M_Print (160, 96, "none");
-	else
-		M_Print (160, 96, va("%i minutes", (int)timelimit.value));
-
-	M_Print (0, 112, "         Episode");
-	// MED 01/06/97 added hipnotic episodes
-	if (hipnotic)
-		M_Print (160, 112, hipnoticepisodes[startepisode].description);
-	// PGM 01/07/97 added rogue episodes
-	else if (rogue)
-		M_Print (160, 112, rogueepisodes[startepisode].description);
-	else
-		M_Print (160, 112, episodes[startepisode].description);
-
-	M_Print (0, 120, "           Level");
-	// MED 01/06/97 added hipnotic episodes
-	if (hipnotic)
-	{
-		M_Print (160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
-		M_Print (160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
+	if (skill.value == 0) {
+		M_Print(160, 80, "Easy difficulty");
+	} else if (skill.value == 1) {
+		M_Print(160, 80, "Normal difficulty");
+	} else if (skill.value == 2) {
+		M_Print(160, 80, "Hard difficulty");
+	} else {
+		M_Print(160, 80, "Nightmare difficulty");
 	}
-	// PGM 01/07/97 added rogue episodes
-	else if (rogue)
-	{
-		M_Print (160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
-		M_Print (160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
+
+	M_Print(0, 88, "       Frag Limit");
+	if (fraglimit.value == 0) {
+		M_Print(160, 88, "none");
+	} else {
+		M_Print(160, 88, va("%i frags", (int)fraglimit.value));
 	}
-	else
-	{
-		M_Print (160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
-		M_Print (160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
+
+	M_Print(0, 96, "       Time Limit");
+	if (timelimit.value == 0) {
+		M_Print(160, 96, "none");
+	} else {
+		M_Print(160, 96, va("%i minutes", (int)timelimit.value));
+	}
+
+	M_Print(0, 112, "         Episode");
+	// MED 01/06/97 added hipnotic episodes
+	if (hipnotic) {
+		M_Print(160, 112, hipnoticepisodes[startepisode].description);
+	// PGM 01/07/97 added rogue episodes
+	} else if (rogue) {
+		M_Print(160, 112, rogueepisodes[startepisode].description);
+	} else {
+		M_Print(160, 112, episodes[startepisode].description);
+	}
+
+	M_Print(0, 120, "           Level");
+	if (hipnotic) {	// MED 01/06/97 added hipnotic episodes
+		M_Print(160, 120, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print(160, 128, hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name);
+	} else if (rogue) {	// PGM 01/07/97 added rogue episodes
+		M_Print(160, 120, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].description);
+		M_Print(160, 128, roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name);
+	} else {
+		M_Print(160, 120, levels[episodes[startepisode].firstLevel + startlevel].description);
+		M_Print(160, 128, levels[episodes[startepisode].firstLevel + startlevel].name);
 	}
 
 // line cursor
-	M_DrawCharacter (144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
+	M_DrawCharacter(144, gameoptions_cursor_table[gameoptions_cursor], 12+((int)(realtime*4)&1));
 
-	if (m_serverInfoMessage)
-	{
-		if ((realtime - m_serverInfoMessageTime) < 5.0)
-		{
+	if (m_serverInfoMessage) {
+		if ((realtime - m_serverInfoMessageTime) < 5.0) {
 			x = (320-26*8)/2;
-			M_DrawTextBox (x, 138, 24, 4);
+			M_DrawTextBox(x, 138, 24, 4);
 			x += 8;
-			M_Print (x, 146, "  More than 4 players   ");
-			M_Print (x, 154, " requires using command ");
-			M_Print (x, 162, "line parameters; please ");
-			M_Print (x, 170, "   see techinfo.txt.    ");
-		}
-		else
-		{
+			M_Print(x, 146, "  More than 4 players   ");
+			M_Print(x, 154, " requires using command ");
+			M_Print(x, 162, "line parameters; please ");
+			M_Print(x, 170, "   see techinfo.txt.    ");
+		} else {
 			m_serverInfoMessage = false;
 		}
 	}
 }
 
 
-void M_NetStart_Change (int dir)
-{
+void M_NetStart_Change(int dir) {
 	int count;
-	float	f;
+	float f;
 
-	switch (gameoptions_cursor)
-	{
+	switch (gameoptions_cursor) {
 	case 1:
 		maxplayers += dir;
-		if (maxplayers > svs.maxclientslimit)
-		{
+		if (maxplayers > svs.maxclientslimit) {
 			maxplayers = svs.maxclientslimit;
 			m_serverInfoMessage = true;
 			m_serverInfoMessageTime = realtime;
 		}
-		if (maxplayers < 2)
+		if (maxplayers < 2) {
 			maxplayers = 2;
+		}
 		break;
 
 	case 2:
-		Cvar_Set ("coop", coop.value ? "0" : "1");
+		Cvar_Set("coop", coop.value ? "0" : "1");
 		break;
 
 	case 3:
 		count = (rogue) ? 6 : 2;
 		f = teamplay.value + dir;
-		if (f > count)	f = 0;
-		else if (f < 0)	f = count;
-		Cvar_SetValue ("teamplay", f);
+		if (f > count) {
+			f = 0;
+		} else if (f < 0) {
+			f = count;
+		}
+		Cvar_SetValue("teamplay", f);
 		break;
 
 	case 4:
 		f = skill.value + dir;
-		if (f > 3)	f = 0;
-		else if (f < 0)	f = 3;
-		Cvar_SetValue ("skill", f);
+		if (f > 3) {
+			f = 0;
+		} else if (f < 0) {
+			f = 3;
+		}
+		Cvar_SetValue("skill", f);
 		break;
 
 	case 5:
 		f = fraglimit.value + dir * 10;
-		if (f > 100)	f = 0;
-		else if (f < 0)	f = 100;
+		if (f > 100) {
+			f = 0;
+		} else if (f < 0) {
+			f = 100;
+		}
 		Cvar_SetValue ("fraglimit", f);
 		break;
 
 	case 6:
 		f = timelimit.value + dir * 5;
-		if (f > 60)	f = 0;
-		else if (f < 0)	f = 60;
+		if (f > 60) {
+			f = 0;
+		} else if (f < 0) {
+			f = 60;
+		}
 		Cvar_SetValue ("timelimit", f);
 		break;
 
 	case 7:
 		startepisode += dir;
 	//MED 01/06/97 added hipnotic count
-		if (hipnotic)
+		if (hipnotic) {
 			count = 6;
+		} else if (rogue) {
 	//PGM 01/07/97 added rogue count
 	//PGM 03/02/97 added 1 for dmatch episode
-		else if (rogue)
 			count = 4;
-		else if (registered.value)
+		} else if (registered.value) {
 			count = 7;
-		else
+		} else {
 			count = 2;
+		}
 
-		if (startepisode < 0)
+		if (startepisode < 0) {
 			startepisode = count - 1;
+		}
 
-		if (startepisode >= count)
+		if (startepisode >= count) {
 			startepisode = 0;
+		}
 
 		startlevel = 0;
 		break;
@@ -2301,25 +2273,25 @@ void M_NetStart_Change (int dir)
 	case 8:
 		startlevel += dir;
 	//MED 01/06/97 added hipnotic episodes
-		if (hipnotic)
+		if (hipnotic) {
 			count = hipnoticepisodes[startepisode].levels;
-	//PGM 01/06/97 added hipnotic episodes
-		else if (rogue)
+		} else if (rogue) {
+	//PGM 01/06/97 added rogue episodes
 			count = rogueepisodes[startepisode].levels;
-		else
+		} else {
 			count = episodes[startepisode].levels;
+		}
 
-		if (startlevel < 0)
+		if (startlevel < 0) {
 			startlevel = count - 1;
-
-		if (startlevel >= count)
+		} else if (startlevel >= count) {
 			startlevel = 0;
+		}
 		break;
 	}
 }
 
-void M_GameOptions_Key (int key)
-{
+void M_GameOptions_Key(int key) {
 	switch (key)
 	{
 	case K_ESCAPE:
@@ -2327,57 +2299,67 @@ void M_GameOptions_Key (int key)
 		M_Menu_Net_f ();
 		break;
 
+	case 'w':
 	case K_UPARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		gameoptions_cursor--;
-		if (gameoptions_cursor < 0)
+		if (gameoptions_cursor < 0) {
 			gameoptions_cursor = NUM_GAMEOPTIONS-1;
+		}
 		break;
 
+	case 's':
 	case K_DOWNARROW:
-		S_LocalSound ("misc/menu1.wav");
+		S_LocalSound("misc/menu1.wav");
 		gameoptions_cursor++;
-		if (gameoptions_cursor >= NUM_GAMEOPTIONS)
+		if (gameoptions_cursor >= NUM_GAMEOPTIONS) {
 			gameoptions_cursor = 0;
+		}
 		break;
 
+	case 'a':
 	case K_LEFTARROW:
-		if (gameoptions_cursor == 0)
+		if (gameoptions_cursor == 0) {
 			break;
-		S_LocalSound ("misc/menu3.wav");
-		M_NetStart_Change (-1);
+		}
+		S_LocalSound("misc/menu3.wav");
+		M_NetStart_Change(-1);
 		break;
 
+	case 'd':
 	case K_RIGHTARROW:
-		if (gameoptions_cursor == 0)
+		if (gameoptions_cursor == 0) {
 			break;
-		S_LocalSound ("misc/menu3.wav");
-		M_NetStart_Change (1);
+		}
+		S_LocalSound("misc/menu3.wav");
+		M_NetStart_Change(1);
 		break;
 
+	case K_SPACE:
 	case K_ENTER:
 	case K_KP_ENTER:
 	case K_ABUTTON:
-		S_LocalSound ("misc/menu2.wav");
-		if (gameoptions_cursor == 0)
-		{
-			if (sv.active)
-				Cbuf_AddText ("disconnect\n");
-			Cbuf_AddText ("listen 0\n");	// so host_netport will be re-examined
-			Cbuf_AddText ( va ("maxplayers %u\n", maxplayers) );
-			SCR_BeginLoadingPlaque ();
+		S_LocalSound("misc/menu2.wav");
+		if (gameoptions_cursor == 0) {
+			if (sv.active) {
+				Cbuf_AddText("disconnect\n");
+			}
+			Cbuf_AddText("listen 0\n");	// so host_netport will be re-examined
+			Cbuf_AddText(va("maxplayers %u\n", maxplayers));
+			SCR_BeginLoadingPlaque();
 
-			if (hipnotic)
-				Cbuf_AddText ( va ("map %s\n", hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name) );
-			else if (rogue)
-				Cbuf_AddText ( va ("map %s\n", roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name) );
-			else
-				Cbuf_AddText ( va ("map %s\n", levels[episodes[startepisode].firstLevel + startlevel].name) );
+			if (hipnotic) {
+				Cbuf_AddText(va("map %s\n", hipnoticlevels[hipnoticepisodes[startepisode].firstLevel + startlevel].name));
+			} else if (rogue) {
+				Cbuf_AddText(va("map %s\n", roguelevels[rogueepisodes[startepisode].firstLevel + startlevel].name));
+			} else {
+				Cbuf_AddText(va("map %s\n", levels[episodes[startepisode].firstLevel + startlevel].name));
+			}
 
 			return;
 		}
 
-		M_NetStart_Change (1);
+		M_NetStart_Change(1);
 		break;
 	}
 }
@@ -2388,8 +2370,7 @@ void M_GameOptions_Key (int key)
 qboolean	searchComplete = false;
 double		searchCompleteTime;
 
-void M_Menu_Search_f (void)
-{
+void M_Menu_Search_f(void) {
 	IN_Deactivate(modestate == MS_WINDOWED);
 	key_dest = key_menu;
 	m_state = m_search;
@@ -2401,56 +2382,50 @@ void M_Menu_Search_f (void)
 
 }
 
-
-void M_Search_Draw (void)
-{
+void M_Search_Draw(void) {
 	qpic_t	*p;
 	int x;
 
-	p = Draw_CachePic ("gfx/p_multi.lmp");
-	M_DrawPic ( (320-p->width)/2, 4, p);
+	p = Draw_CachePic("gfx/p_multi.lmp");
+	M_DrawPic((320-p->width)/2, 4, p);
 	x = (320/2) - ((12*8)/2) + 4;
-	M_DrawTextBox (x-8, 32, 12, 1);
-	M_Print (x, 40, "Searching...");
+	M_DrawTextBox(x-8, 32, 12, 1);
+	M_Print(x, 40, "Searching...");
 
-	if(slistInProgress)
-	{
+	if (slistInProgress) {
 		NET_Poll();
 		return;
 	}
 
-	if (! searchComplete)
-	{
+	if (!searchComplete) {
 		searchComplete = true;
 		searchCompleteTime = realtime;
 	}
 
-	if (hostCacheCount)
-	{
+	if (hostCacheCount) {
 		M_Menu_ServerList_f ();
 		return;
 	}
 
-	M_PrintWhite ((320/2) - ((22*8)/2), 64, "No Quake servers found");
-	if ((realtime - searchCompleteTime) < 3.0)
+	M_PrintWhite((320/2) - ((22*8)/2), 64, "No Quake servers found");
+	if (realtime - searchCompleteTime < 3.0) {
 		return;
+	}
 
-	M_Menu_LanConfig_f ();
+	M_Menu_LanConfig_f();
 }
 
 
-void M_Search_Key (int key)
-{
+void M_Search_Key(int key) {
 }
 
 //=============================================================================
 /* SLIST MENU */
 
-int		slist_cursor;
+int slist_cursor;
 qboolean slist_sorted;
 
-void M_Menu_ServerList_f (void)
-{
+void M_Menu_ServerList_f(void) {
 	IN_Deactivate(modestate == MS_WINDOWED);
 	key_dest = key_menu;
 	m_state = m_slist;
@@ -2462,10 +2437,8 @@ void M_Menu_ServerList_f (void)
 }
 
 
-void M_ServerList_Draw (void)
-{
-	int	n;
-	qpic_t	*p;
+void M_ServerList_Draw(void) {
+	qpic_t *p;
 
 	if (!slist_sorted)
 	{
@@ -2475,7 +2448,7 @@ void M_ServerList_Draw (void)
 
 	p = Draw_CachePic ("gfx/p_multi.lmp");
 	M_DrawPic ( (320-p->width)/2, 4, p);
-	for (n = 0; n < hostCacheCount; n++)
+	for (int n = 0; n < hostCacheCount; n++)
 		M_Print (16, 32 + 8*n, NET_SlistPrintServer (n));
 	M_DrawCharacter (0, 32 + slist_cursor*8, 12+((int)(realtime*4)&1));
 
@@ -2484,10 +2457,8 @@ void M_ServerList_Draw (void)
 }
 
 
-void M_ServerList_Key (int k)
-{
-	switch (k)
-	{
+void M_ServerList_Key(int k) {
+	switch (k) {
 	case K_ESCAPE:
 	case K_BBUTTON:
 		M_Menu_LanConfig_f ();
@@ -2497,6 +2468,8 @@ void M_ServerList_Key (int k)
 		M_Menu_Search_f ();
 		break;
 
+	case 'w':
+	case 'a':
 	case K_UPARROW:
 	case K_LEFTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -2505,6 +2478,8 @@ void M_ServerList_Key (int k)
 			slist_cursor = hostCacheCount - 1;
 		break;
 
+	case 's':
+	case 'd':
 	case K_DOWNARROW:
 	case K_RIGHTARROW:
 		S_LocalSound ("misc/menu1.wav");
@@ -2536,103 +2511,96 @@ void M_ServerList_Key (int k)
 /* Menu Subsystem */
 
 
-void M_Init (void)
-{
-	Cmd_AddCommand ("togglemenu", M_ToggleMenu_f);
+void M_Init(void) {
+	Cmd_AddCommand("togglemenu", M_ToggleMenu_f);
 
-	Cmd_AddCommand ("menu_main", M_Menu_Main_f);
-	Cmd_AddCommand ("menu_singleplayer", M_Menu_SinglePlayer_f);
-	Cmd_AddCommand ("menu_load", M_Menu_Load_f);
-	Cmd_AddCommand ("menu_save", M_Menu_Save_f);
-	Cmd_AddCommand ("menu_multiplayer", M_Menu_MultiPlayer_f);
-	Cmd_AddCommand ("menu_setup", M_Menu_Setup_f);
-	Cmd_AddCommand ("menu_options", M_Menu_Options_f);
-	Cmd_AddCommand ("menu_keys", M_Menu_Keys_f);
-	Cmd_AddCommand ("menu_video", M_Menu_Video_f);
-	Cmd_AddCommand ("help", M_Menu_Help_f);
-	Cmd_AddCommand ("menu_quit", M_Menu_Quit_f);
+	Cmd_AddCommand("menu_main", M_Menu_Main_f);
+	Cmd_AddCommand("menu_singleplayer", M_Menu_SinglePlayer_f);
+	Cmd_AddCommand("menu_load", M_Menu_Load_f);
+	Cmd_AddCommand("menu_save", M_Menu_Save_f);
+	Cmd_AddCommand("menu_multiplayer", M_Menu_MultiPlayer_f);
+	Cmd_AddCommand("menu_setup", M_Menu_Setup_f);
+	Cmd_AddCommand("menu_options", M_Menu_Options_f);
+	Cmd_AddCommand("menu_keys", M_Menu_Keys_f);
+	Cmd_AddCommand("menu_video", M_Menu_Video_f);
+	Cmd_AddCommand("help", M_Menu_Help_f);
+	Cmd_AddCommand("menu_quit", M_Menu_Quit_f);
 }
 
 
-void M_Draw (void)
-{
-	if (m_state == m_none || key_dest != key_menu)
+void M_Draw (void) {
+	if (m_state == m_none || key_dest != key_menu) {
 		return;
+	}
 
-	if (!m_recursiveDraw)
-	{
-		if (scr_con_current)
-		{
-			Draw_ConsoleBackground ();
-			S_ExtraUpdate ();
+	if (!m_recursiveDraw) {
+		if (scr_con_current) {
+			Draw_ConsoleBackground();
+			S_ExtraUpdate();
 		}
 
-		Draw_FadeScreen (); //johnfitz -- fade even if console fills screen
-	}
-	else
-	{
+		Draw_FadeScreen(); //johnfitz -- fade even if console fills screen
+	} else {
 		m_recursiveDraw = false;
 	}
 
-	GL_SetCanvas (CANVAS_MENU); //johnfitz
+	GL_SetCanvas(CANVAS_MENU); //johnfitz
 
-	switch (m_state)
-	{
+	switch (m_state) {
 	case m_none:
 		break;
 
 	case m_main:
-		M_Main_Draw ();
+		M_Main_Draw();
 		break;
 
 	case m_singleplayer:
-		M_SinglePlayer_Draw ();
+		M_SinglePlayer_Draw();
 		break;
 
 	case m_load:
-		M_Load_Draw ();
+		M_Load_Draw();
 		break;
 
 	case m_save:
-		M_Save_Draw ();
+		M_Save_Draw();
 		break;
 
 	case m_multiplayer:
-		M_MultiPlayer_Draw ();
+		M_MultiPlayer_Draw();
 		break;
 
 	case m_setup:
-		M_Setup_Draw ();
+		M_Setup_Draw();
 		break;
 
 	case m_net:
-		M_Net_Draw ();
+		M_Net_Draw();
 		break;
 
 	case m_options:
-		M_Options_Draw ();
+		M_Options_Draw();
 		break;
 
 	case m_keys:
-		M_Keys_Draw ();
+		M_Keys_Draw();
 		break;
 
 	case m_video:
-		M_Video_Draw ();
+		M_Video_Draw();
 		break;
 
 	case m_help:
-		M_Help_Draw ();
+		M_Help_Draw();
 		break;
 
 	case m_quit:
-		if (!fitzmode)
-		{ /* QuakeSpasm customization: */
+		if (!fitzmode) { /* QuakeSpasm customization: */
 			/* Quit now! S.A. */
 			key_dest = key_console;
-			Host_Quit_f ();
+			Host_Quit_f();
 		}
-		M_Quit_Draw ();
+		M_Quit_Draw();
 		break;
 
 	case m_lanconfig:

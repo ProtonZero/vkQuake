@@ -78,11 +78,9 @@ float		scr_con_current;
 float		scr_conlines;		// lines of console to display
 
 //johnfitz -- new cvars
-cvar_t		scr_menuscale = {"scr_menuscale", "1", CVAR_ARCHIVE};
-cvar_t		scr_sbarscale = {"scr_sbarscale", "1", CVAR_ARCHIVE};
+extern cvar_t scr_uiscale;
 cvar_t		scr_sbaralpha = {"scr_sbaralpha", "0.75", CVAR_ARCHIVE};
 cvar_t		scr_conwidth = {"scr_conwidth", "0", CVAR_ARCHIVE};
-cvar_t		scr_conscale = {"scr_conscale", "1", CVAR_ARCHIVE};
 cvar_t		scr_crosshairscale = {"scr_crosshairscale", "1", CVAR_ARCHIVE};
 cvar_t		scr_showfps = {"scr_showfps", "0", CVAR_NONE};
 cvar_t		scr_clock = {"scr_clock", "0", CVAR_NONE};
@@ -231,26 +229,76 @@ void SCR_CheckDrawCenterString (void)
 //=============================================================================
 
 /*
+fovAreaOfSphere
+Takes a horizontal fov and an aspect ratio and returns the portion of an entire
+sphere that is visible (0 = no vision, 1 = omnidirectional vision,
+						0.12504723638969 =  90 fov @ 4:3
+						0.17192059311555 = 110 fov @ 4:3)
+*/
+
+float CalcFovyAspect(float fov_x, float aspect) {
+	return atan(tan(fov_x) * aspect);
+}
+#define DEG2RAD(a) (a * M_PI_DIV_180)
+float fovAreaOfSphere(float hfov, float aspect) {
+	return sin(DEG2RAD(hfov) * 0.5) * sin(CalcFovyAspect(DEG2RAD(hfov) * 0.5, aspect)) / M_PI;
+}
+
+/*
+fovForSphereArea
+Takes a desired sphere area (see fovAreaOfSphere) and aspect ratio and returns a
+corresponding horizontal fov.
+*/
+float fovForSphereArea(float sphereArea, float aspect) {
+	float approx;
+	float incdec = 179;
+	for (uint_fast8_t i = 0; i < 23; i++) {
+		float x = fovAreaOfSphere(approx, aspect);
+		if (sphereArea > x) {
+			approx += incdec;
+		} else if (sphereArea < x) {
+			approx -= incdec;
+		} else {
+			return approx;
+		}
+		incdec *= 0.5;
+	}
+	if (approx < 1 || approx > 179) {
+		Sys_Error("Bad fov: %f", approx);
+	}
+	return approx;
+}
+
+#define SPHERE_AREA_90_4_3 0.12504723638969   //  90 degree FOV @ 4:3
+#define SPHERE_AREA_110_4_3 0.17192059311555  // 110 degree FOV @ 4:3
+
+/*
 ====================
 AdaptFovx
 Adapt a 4:3 horizontal FOV to the current screen size using the "Hor+" scaling:
 2.0 * atan(width / height * 3.0 / 4.0 * tan(fov_x / 2.0))
 ====================
 */
-float AdaptFovx (float fov_x, float width, float height)
-{
-	float	a, x;
+float AdaptFovx(float fov_x, float width, float height) {
+	// Proton: calculate a fov based on spherical visibility, so no aspect ratio
+	//         has an advantage given the same "fov"
+	return fovForSphereArea(fov_x, height / width);
+	/*
+	float a, x;
 
-	if (fov_x < 1 || fov_x > 179)
+	if (fov_x < 1 || fov_x > 179) {
 		Sys_Error ("Bad fov: %f", fov_x);
+	}
 
-	if (!scr_fov_adapt.value)
+	if (!scr_fov_adapt.value) {
 		return fov_x;
-	if ((x = height / width) == 0.75)
+	}
+	if ((x = height / width) == 0.75) {
 		return fov_x;
-	a = atan(0.75 / x * tan(fov_x / 360 * M_PI));
-	a = a * 360 / M_PI;
+	}
+	a = atan(0.75 / x * tan(fov_x / 360 * M_PI)) * 360 / M_PI;
 	return a;
+	//*/
 }
 
 /*
@@ -258,17 +306,8 @@ float AdaptFovx (float fov_x, float width, float height)
 CalcFovy
 ====================
 */
-float CalcFovy (float fov_x, float width, float height)
-{
-	float	a, x;
-
-	if (fov_x < 1 || fov_x > 179)
-		Sys_Error ("Bad fov: %f", fov_x);
-
-	x = width / tan(fov_x / 360 * M_PI);
-	a = atan(height / x);
-	a = a * 360 / M_PI;
-	return a;
+float CalcFovy(float fov_x, float width, float height) {
+	return atan(height / (width / tan(fov_x / 360 * M_PI))) * 360 / M_PI;
 }
 
 /*
@@ -279,9 +318,9 @@ Must be called whenever vid changes
 Internal use only
 =================
 */
-static void SCR_CalcRefdef (void)
+static void SCR_CalcRefdef(void)
 {
-	float		size, scale; //johnfitz -- scale
+	float size, scale; //johnfitz -- scale
 
 // force the status bar to redraw
 	Sbar_Changed ();
@@ -289,29 +328,32 @@ static void SCR_CalcRefdef (void)
 	scr_tileclear_updates = 0; //johnfitz
 
 // bound viewsize
-	if (scr_viewsize.value < 30)
+	if (scr_viewsize.value < 30) {
 		Cvar_SetQuick (&scr_viewsize, "30");
-	if (scr_viewsize.value > 120)
+	} else if (scr_viewsize.value > 120) {
 		Cvar_SetQuick (&scr_viewsize, "120");
+	}
 
 // bound fov
-	if (scr_fov.value < 10)
+	if (scr_fov.value < 10) {
 		Cvar_SetQuick (&scr_fov, "10");
-	if (scr_fov.value > 170)
+	} else if (scr_fov.value > 170) {
 		Cvar_SetQuick (&scr_fov, "170");
+	}
 
 	vid.recalc_refdef = 0;
 
 	//johnfitz -- rewrote this section
 	size = scr_viewsize.value;
-	scale = CLAMP (1.0, scr_sbarscale.value, (float)glwidth / 320.0);
+	scale = scr_uiscale.value;
 
-	if (size >= 120 || cl.intermission || scr_sbaralpha.value < 1) //johnfitz -- scr_sbaralpha.value
+	if (size >= 120 || cl.intermission || scr_sbaralpha.value < 1) { //johnfitz -- scr_sbaralpha.value
 		sb_lines = 0;
-	else if (size >= 110)
+	} else if (size >= 110) {
 		sb_lines = 24 * scale;
-	else
+	} else {
 		sb_lines = 48 * scale;
+	}
 
 	size = q_min(scr_viewsize.value, 100) / 100;
 	//johnfitz
@@ -323,8 +365,11 @@ static void SCR_CalcRefdef (void)
 	r_refdef.vrect.y = (glheight - sb_lines - r_refdef.vrect.height)/2;
 	//johnfitz
 
-	r_refdef.fov_x = AdaptFovx(scr_fov.value, vid.width, vid.height);
-	r_refdef.fov_y = CalcFovy (r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
+	//Con_Printf("Calculated FOV for sphere area %g: %g\n", scr_fov.value > 90 ? SPHERE_AREA_110_4_3 : SPHERE_AREA_90_4_3, AdaptFovx(scr_fov.value > 90 ? SPHERE_AREA_110_4_3 : SPHERE_AREA_90_4_3, vid.width, vid.height));
+	r_refdef.fov_x = AdaptFovx(scr_fov.value > 90 ? SPHERE_AREA_110_4_3 : SPHERE_AREA_90_4_3, vid.width, vid.height);
+	//r_refdef.fov_x = AdaptFovx(scr_fov.value > 90 ? 110 : 90, vid.width, vid.height);
+	//Con_Printf("Calculated vFOV: %g\n", CalcFovy(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height));
+	r_refdef.fov_y = CalcFovy(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
 
 	scr_vrect = r_refdef.vrect;
 }
@@ -362,13 +407,13 @@ static void SCR_Callback_refdef (cvar_t *var)
 
 /*
 ==================
-SCR_Conwidth_f -- johnfitz -- called when scr_conwidth or scr_conscale changes
+SCR_Conwidth_f -- johnfitz -- called when scr_conwidth or scr_uiscale changes
 ==================
 */
 void SCR_Conwidth_f (cvar_t *var)
 {
 	vid.recalc_refdef = 1;
-	vid.conwidth = (scr_conwidth.value > 0) ? (int)scr_conwidth.value : (scr_conscale.value > 0) ? (int)(vid.width/scr_conscale.value) : vid.width;
+	vid.conwidth = (scr_conwidth.value > 0) ? (int)scr_conwidth.value : (scr_uiscale.value > 0) ? (int)(vid.width/scr_uiscale.value) : vid.width;
 	vid.conwidth = CLAMP (320, vid.conwidth, vid.width);
 	vid.conwidth &= 0xFFFFFFF8;
 	vid.conheight = vid.conwidth * vid.height / vid.width;
@@ -396,14 +441,10 @@ SCR_Init
 void SCR_Init (void)
 {
 	//johnfitz -- new cvars
-	Cvar_RegisterVariable (&scr_menuscale);
-	Cvar_RegisterVariable (&scr_sbarscale);
 	Cvar_SetCallback (&scr_sbaralpha, SCR_Callback_refdef);
 	Cvar_RegisterVariable (&scr_sbaralpha);
 	Cvar_SetCallback (&scr_conwidth, &SCR_Conwidth_f);
-	Cvar_SetCallback (&scr_conscale, &SCR_Conwidth_f);
 	Cvar_RegisterVariable (&scr_conwidth);
-	Cvar_RegisterVariable (&scr_conscale);
 	Cvar_RegisterVariable (&scr_crosshairscale);
 	Cvar_RegisterVariable (&scr_showfps);
 	Cvar_RegisterVariable (&scr_clock);

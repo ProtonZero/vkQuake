@@ -81,17 +81,20 @@ extern qboolean scr_initialized;
 
 //====================================
 
+cvar_t scr_uiscale = {"scr_uiscale", "2", CVAR_NONE};
+void SCR_Conwidth_f(cvar_t *var);
+
 //johnfitz -- new cvars
 static cvar_t	vid_fullscreen = {"vid_fullscreen", "0", CVAR_ARCHIVE};	// QuakeSpasm, was "1"
-static cvar_t	vid_width = {"vid_width", "800", CVAR_ARCHIVE};		// QuakeSpasm, was 640
-static cvar_t	vid_height = {"vid_height", "600", CVAR_ARCHIVE};	// QuakeSpasm, was 480
-static cvar_t	vid_bpp = {"vid_bpp", "16", CVAR_ARCHIVE};
+static cvar_t	vid_width = {"vid_width", "1920", CVAR_ARCHIVE};		// QuakeSpasm, was 640
+static cvar_t	vid_height = {"vid_height", "1080", CVAR_ARCHIVE};	// QuakeSpasm, was 480
+static cvar_t	vid_bpp = {"vid_bpp", "32", CVAR_ARCHIVE};
 static cvar_t	vid_refreshrate = {"vid_refreshrate", "60", CVAR_ARCHIVE};
 static cvar_t	vid_vsync = {"vid_vsync", "0", CVAR_ARCHIVE};
 static cvar_t	vid_desktopfullscreen = {"vid_desktopfullscreen", "0", CVAR_ARCHIVE}; // QuakeSpasm
 static cvar_t	vid_borderless = {"vid_borderless", "0", CVAR_ARCHIVE}; // QuakeSpasm
-cvar_t	vid_filter = {"vid_filter", "0", CVAR_ARCHIVE};
-cvar_t	vid_anisotropic = {"vid_anisotropic", "0", CVAR_ARCHIVE};
+cvar_t	vid_filter = {"vid_filter", "1", CVAR_ARCHIVE};
+cvar_t	vid_anisotropic = {"vid_anisotropic", "1", CVAR_ARCHIVE};
 cvar_t vid_fsaa = {"vid_fsaa", "0", CVAR_ARCHIVE};
 cvar_t vid_fsaamode = { "vid_fsaamode", "0", CVAR_ARCHIVE };
 
@@ -160,7 +163,7 @@ VkBool32 debug_message_callback(VkDebugReportFlagsEXT flags, VkDebugReportObject
 	{
 		prefix = "WARNING";
 	};
-	
+
 	Sys_Printf("[Validation %s]: %s\n", prefix, pMsg);
 
 	return VK_FALSE;
@@ -224,12 +227,12 @@ static int VID_GetCurrentRefreshRate (void)
 {
 	SDL_DisplayMode mode;
 	int current_display;
-	
+
 	current_display = SDL_GetWindowDisplayIndex(draw_context);
-	
+
 	if (0 != SDL_GetCurrentDisplayMode(current_display, &mode))
 		return DEFAULT_REFRESHRATE;
-	
+
 	return mode.refresh_rate;
 }
 
@@ -332,10 +335,10 @@ static SDL_DisplayMode *VID_SDL2_GetDisplayMode(int width, int height, int refre
 	{
 		if (SDL_GetDisplayMode(0, i, &mode) != 0)
 			continue;
-		
+
 		if (mode.w == width && mode.h == height
-			&& SDL_BITSPERPIXEL(mode.format) == bpp
-			&& mode.refresh_rate == refreshrate)
+		        && SDL_BITSPERPIXEL(mode.format) == bpp
+		        && mode.refresh_rate == refreshrate)
 		{
 			return &mode;
 		}
@@ -353,7 +356,7 @@ static qboolean VID_ValidMode (int width, int height, int refreshrate, int bpp, 
 // ignore width / height / bpp if vid_desktopfullscreen is enabled
 	if (fullscreen && vid_desktopfullscreen.value)
 		return true;
-	
+
 	if (width < 320)
 		return false;
 
@@ -381,78 +384,80 @@ static qboolean VID_ValidMode (int width, int height, int refreshrate, int bpp, 
 VID_SetMode
 ================
 */
-static qboolean VID_SetMode (int width, int height, int refreshrate, int bpp, qboolean fullscreen)
-{
-	int		temp;
-	Uint32	flags;
-	char		caption[50];
-	int		previous_display;
-	
+static qboolean VID_SetMode(int width, int height, int refreshrate, int bpp, qboolean fullscreen) {
+	int temp;
+	Uint32 flags;
+	char caption[50];
+	int previous_display;
+
 	// so Con_Printfs don't mess us up by forcing vid and snd updates
 	temp = scr_disabled_for_loading;
 	scr_disabled_for_loading = true;
 
-	CDAudio_Pause ();
-	BGM_Pause ();
+	CDAudio_Pause();
+	BGM_Pause();
 
 	q_snprintf(caption, sizeof(caption), "vkQuake " VKQUAKE_VER_STRING);
 
 	/* Create the window if needed, hidden */
-	if (!draw_context)
-	{
+	if (!draw_context) {
 		flags = SDL_WINDOW_HIDDEN | SDL_WINDOW_VULKAN;
 
-		if (vid_borderless.value)
+		if (vid_borderless.value) {
 			flags |= SDL_WINDOW_BORDERLESS;
-		
+		}
+
 		draw_context = SDL_CreateWindow (caption, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, flags);
-		if (!draw_context)
+		if (!draw_context) {
 			Sys_Error ("Couldn't create window");
+		}
 
 		SDL_VERSION(&sys_wm_info.version);
-		if(!SDL_GetWindowWMInfo(draw_context,&sys_wm_info))
+		if(!SDL_GetWindowWMInfo(draw_context,&sys_wm_info)) {
 			Sys_Error ("Couldn't get window wm info");
+		}
 
 		previous_display = -1;
-	}
-	else
-	{
+	} else {
 		previous_display = SDL_GetWindowDisplayIndex(draw_context);
 	}
 
 	/* Ensure the window is not fullscreen */
-	if (VID_GetFullscreen ())
-	{
-		if (SDL_SetWindowFullscreen (draw_context, 0) != 0)
+	if (VID_GetFullscreen()) {
+		if (SDL_SetWindowFullscreen(draw_context, 0) != 0)
 			Sys_Error("Couldn't set fullscreen state mode");
 	}
 
 	/* Set window size and display mode */
-	SDL_SetWindowSize (draw_context, width, height);
-	if (previous_display >= 0)
-		SDL_SetWindowPosition (draw_context, SDL_WINDOWPOS_CENTERED_DISPLAY(previous_display), SDL_WINDOWPOS_CENTERED_DISPLAY(previous_display));
-	else
+	SDL_SetWindowSize(draw_context, width, height);
+	if (previous_display >= 0) {
+		SDL_SetWindowPosition(draw_context, SDL_WINDOWPOS_CENTERED_DISPLAY(previous_display), SDL_WINDOWPOS_CENTERED_DISPLAY(previous_display));
+	} else {
 		SDL_SetWindowPosition(draw_context, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_SetWindowDisplayMode (draw_context, VID_SDL2_GetDisplayMode(width, height, refreshrate, bpp));
-	SDL_SetWindowBordered (draw_context, vid_borderless.value ? SDL_FALSE : SDL_TRUE);
+	}
+	SDL_SetWindowDisplayMode(draw_context, VID_SDL2_GetDisplayMode(width, height, refreshrate, bpp));
+	SDL_SetWindowBordered(draw_context, vid_borderless.value ? SDL_FALSE : SDL_TRUE);
 
 	/* Make window fullscreen if needed, and show the window */
 
 	if (fullscreen) {
 		Uint32 flags = vid_desktopfullscreen.value ?
-			SDL_WINDOW_FULLSCREEN_DESKTOP :
-			SDL_WINDOW_FULLSCREEN;
-		if (SDL_SetWindowFullscreen (draw_context, flags) != 0)
-			Sys_Error ("Couldn't set fullscreen state mode");
+		               SDL_WINDOW_FULLSCREEN_DESKTOP :
+		               SDL_WINDOW_FULLSCREEN;
+		if (SDL_SetWindowFullscreen (draw_context, flags) != 0) {
+			Sys_Error("Couldn't set fullscreen state mode");
+		}
 	}
 
-	SDL_ShowWindow (draw_context);
+	SDL_ShowWindow(draw_context);
 
 	vid.width = VID_GetCurrentWidth();
 	vid.height = VID_GetCurrentHeight();
 	vid.conwidth = vid.width & 0xFFFFFFF8;
 	vid.conheight = vid.conwidth * vid.height / vid.width;
 	vid.numpages = 2;
+
+	Cvar_SetValueQuick(&scr_uiscale, vid.height / 240.0);
 
 	modestate = VID_GetFullscreen() ? MS_FULLSCREEN : MS_WINDOWED;
 
@@ -842,12 +847,12 @@ static void GL_InitDevice( void )
 
 	// Find color buffer format
 	vulkan_globals.color_format = VK_FORMAT_R8G8B8A8_UNORM;
-	
+
 	if (extended_format_support == VK_TRUE)
 	{
 		vkGetPhysicalDeviceFormatProperties(vulkan_physical_device, VK_FORMAT_A2B10G10R10_UNORM_PACK32, &format_properties);
 		qboolean a2_b10_g10_r10_support = (format_properties.optimalTilingFeatures & REQUIRED_COLOR_BUFFER_FEATURES) == REQUIRED_COLOR_BUFFER_FEATURES;
-	
+
 		if (a2_b10_g10_r10_support)
 		{
 			Con_Printf("Using A2B10G10R10 color buffer format\n");
@@ -872,7 +877,7 @@ static void GL_InitDevice( void )
 		Con_Printf("Using D32 depth buffer format\n");
 		vulkan_globals.depth_format = VK_FORMAT_D32_SFLOAT;
 	}
-	
+
 }
 
 /*
@@ -918,7 +923,7 @@ static void GL_InitCommandBuffers( void )
 	memset(&fence_create_info, 0, sizeof(fence_create_info));
 	fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 
-	for (i = 0; i < NUM_COMMAND_BUFFERS; ++i) 
+	for (i = 0; i < NUM_COMMAND_BUFFERS; ++i)
 	{
 		err = vkCreateFence(vulkan_globals.device, &fence_create_info, NULL, &command_buffer_fences[i]);
 		if (err != VK_SUCCESS)
@@ -1109,7 +1114,7 @@ static void GL_CreateDepthBuffer( void )
 	Con_Printf("Creating depth buffer\n");
 
 	VkResult err;
-	
+
 	VkImageCreateInfo image_create_info;
 	memset(&image_create_info, 0, sizeof(image_create_info));
 	image_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -1211,7 +1216,7 @@ static void GL_CreateColorBuffer( void )
 		err = vkCreateImage(vulkan_globals.device, &image_create_info, NULL, &vulkan_globals.color_buffers[i]);
 		if (err != VK_SUCCESS)
 			Sys_Error("vkCreateImage failed");
-	
+
 		GL_SetObjectName((uint64_t)vulkan_globals.color_buffers[i], VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, va("Color Buffer %d", i));
 
 		VkMemoryRequirements memory_requirements;
@@ -1283,20 +1288,20 @@ static void GL_CreateColorBuffer( void )
 
 		switch(vulkan_globals.sample_count)
 		{
-			case VK_SAMPLE_COUNT_2_BIT:
-				Con_Printf("2 AA Samples\n");
-				break;
-			case VK_SAMPLE_COUNT_4_BIT:
-				Con_Printf("4 AA Samples\n");
-				break;
-			case VK_SAMPLE_COUNT_8_BIT:
-				Con_Printf("8 AA Samples\n");
-				break;
-			case VK_SAMPLE_COUNT_16_BIT:
-				Con_Printf("16 AA Samples\n");
-				break;
-			default:
-				break;
+		case VK_SAMPLE_COUNT_2_BIT:
+			Con_Printf("2 AA Samples\n");
+			break;
+		case VK_SAMPLE_COUNT_4_BIT:
+			Con_Printf("4 AA Samples\n");
+			break;
+		case VK_SAMPLE_COUNT_8_BIT:
+			Con_Printf("8 AA Samples\n");
+			break;
+		case VK_SAMPLE_COUNT_16_BIT:
+			Con_Printf("16 AA Samples\n");
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -1314,7 +1319,7 @@ static void GL_CreateColorBuffer( void )
 			Sys_Error("vkCreateImage failed");
 
 		GL_SetObjectName((uint64_t)msaa_color_buffer, VK_DEBUG_REPORT_OBJECT_TYPE_IMAGE_EXT, "MSAA Color Buffer");
-	
+
 		VkMemoryRequirements memory_requirements;
 		vkGetImageMemoryRequirements(vulkan_globals.device, msaa_color_buffer, &memory_requirements);
 
@@ -1766,7 +1771,7 @@ void GL_BeginRendering (int *x, int *y, int *width, int *height)
 	vulkan_globals.main_clear_values[2] = vulkan_globals.color_clear_value;
 
 	const qboolean resolve = (vulkan_globals.sample_count != VK_SAMPLE_COUNT_1_BIT);
-	
+
 	memset(&vulkan_globals.main_render_pass_begin_infos, 0, sizeof(vulkan_globals.main_render_pass_begin_infos));
 	for (i = 0; i < 2; ++i)
 	{
@@ -1825,7 +1830,7 @@ void GL_EndRendering (void)
 {
 	R_SubmitStagingBuffers();
 	R_FlushDynamicBuffers();
-	
+
 	VkResult err;
 
 	// Render post process
@@ -1868,7 +1873,7 @@ void GL_EndRendering (void)
 	present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	present_info.swapchainCount = 1;
 	present_info.pSwapchains = &vulkan_swapchain,
-	present_info.pImageIndices = &current_swapchain_buffer;
+	             present_info.pImageIndices = &current_swapchain_buffer;
 	present_info.waitSemaphoreCount = 1;
 	present_info.pWaitSemaphores = &draw_complete_semaphores[current_command_buffer];
 	err = fpQueuePresentKHR(vulkan_globals.queue, &present_info);
@@ -1945,11 +1950,11 @@ static void VID_DescribeCurrentMode_f (void)
 {
 	if (draw_context)
 		Con_Printf("%dx%dx%d %dHz %s\n",
-			VID_GetCurrentWidth(),
-			VID_GetCurrentHeight(),
-			VID_GetCurrentBPP(),
-			VID_GetCurrentRefreshRate(),
-			VID_GetFullscreen() ? "fullscreen" : "windowed");
+		           VID_GetCurrentWidth(),
+		           VID_GetCurrentHeight(),
+		           VID_GetCurrentBPP(),
+		           VID_GetCurrentRefreshRate(),
+		           VID_GetFullscreen() ? "fullscreen" : "windowed");
 }
 
 /*
@@ -2019,75 +2024,76 @@ static void VID_InitModelist (void)
 VID_Init
 ===================
 */
-void	VID_Init (void)
-{
+void VID_Init(void) {
 	static char vid_center[] = "SDL_VIDEO_CENTERED=center";
-	int		p, width, height, refreshrate, bpp;
-	int		display_width, display_height, display_refreshrate, display_bpp;
-	qboolean	fullscreen;
-	const char	*read_vars[] = { "vid_fullscreen",
-					 "vid_width",
-					 "vid_height",
-					 "vid_refreshrate",
-					 "vid_bpp",
-					 "vid_vsync",
-					 "vid_desktopfullscreen",
-					 "vid_fsaamode",
-					 "vid_fsaa",
-					 "vid_borderless"};
+	int p, width, height, refreshrate, bpp;
+	int display_width, display_height, display_refreshrate, display_bpp;
+	qboolean fullscreen;
+	const char *read_vars[] = { "vid_fullscreen",
+	                            "vid_width",
+	                            "vid_height",
+	                            "vid_refreshrate",
+	                            "vid_bpp",
+	                            "vid_vsync",
+	                            "vid_desktopfullscreen",
+	                            "vid_fsaamode",
+	                            "vid_fsaa",
+	                            "vid_borderless"
+	                          };
 #define num_readvars	( sizeof(read_vars)/sizeof(read_vars[0]) )
 
-	Cvar_RegisterVariable (&vid_fullscreen); //johnfitz
-	Cvar_RegisterVariable (&vid_width); //johnfitz
-	Cvar_RegisterVariable (&vid_height); //johnfitz
-	Cvar_RegisterVariable (&vid_refreshrate); //johnfitz
-	Cvar_RegisterVariable (&vid_bpp); //johnfitz
-	Cvar_RegisterVariable (&vid_vsync); //johnfitz
-	Cvar_RegisterVariable (&vid_filter);
-	Cvar_RegisterVariable (&vid_anisotropic);
-	Cvar_RegisterVariable (&vid_fsaamode);
-	Cvar_RegisterVariable (&vid_fsaa);
-	Cvar_RegisterVariable (&vid_desktopfullscreen); //QuakeSpasm
-	Cvar_RegisterVariable (&vid_borderless); //QuakeSpasm
-	Cvar_SetCallback (&vid_fullscreen, VID_Changed_f);
-	Cvar_SetCallback (&vid_width, VID_Changed_f);
-	Cvar_SetCallback (&vid_height, VID_Changed_f);
-	Cvar_SetCallback (&vid_refreshrate, VID_Changed_f);
-	Cvar_SetCallback (&vid_bpp, VID_Changed_f);
-	Cvar_SetCallback (&vid_filter, VID_FilterChanged_f);
-	Cvar_SetCallback (&vid_anisotropic, VID_FilterChanged_f);
-	Cvar_SetCallback (&vid_fsaamode, VID_Changed_f);
-	Cvar_SetCallback (&vid_fsaa, VID_Changed_f);
-	Cvar_SetCallback (&vid_vsync, VID_Changed_f);
-	Cvar_SetCallback (&vid_desktopfullscreen, VID_Changed_f);
-	Cvar_SetCallback (&vid_borderless, VID_Changed_f);
-	
-	Cmd_AddCommand ("vid_unlock", VID_Unlock); //johnfitz
-	Cmd_AddCommand ("vid_restart", VID_Restart); //johnfitz
-	Cmd_AddCommand ("vid_test", VID_Test); //johnfitz
-	Cmd_AddCommand ("vid_describecurrentmode", VID_DescribeCurrentMode_f);
-	Cmd_AddCommand ("vid_describemodes", VID_DescribeModes_f);
+	Cvar_RegisterVariable(&scr_uiscale);
+	Cvar_RegisterVariable(&vid_fullscreen); //johnfitz
+	Cvar_RegisterVariable(&vid_width); //johnfitz
+	Cvar_RegisterVariable(&vid_height); //johnfitz
+	Cvar_RegisterVariable(&vid_refreshrate); //johnfitz
+	Cvar_RegisterVariable(&vid_bpp); //johnfitz
+	Cvar_RegisterVariable(&vid_vsync); //johnfitz
+	Cvar_RegisterVariable(&vid_filter);
+	Cvar_RegisterVariable(&vid_anisotropic);
+	Cvar_RegisterVariable(&vid_fsaamode);
+	Cvar_RegisterVariable(&vid_fsaa);
+	Cvar_RegisterVariable(&vid_desktopfullscreen); //QuakeSpasm
+	Cvar_RegisterVariable(&vid_borderless); //QuakeSpasm
+	Cvar_SetCallback(&scr_uiscale, SCR_Conwidth_f);
+	Cvar_SetCallback(&vid_fullscreen, VID_Changed_f);
+	Cvar_SetCallback(&vid_width, VID_Changed_f);
+	Cvar_SetCallback(&vid_height, VID_Changed_f);
+	Cvar_SetCallback(&vid_refreshrate, VID_Changed_f);
+	Cvar_SetCallback(&vid_bpp, VID_Changed_f);
+	Cvar_SetCallback(&vid_filter, VID_FilterChanged_f);
+	Cvar_SetCallback(&vid_anisotropic, VID_FilterChanged_f);
+	Cvar_SetCallback(&vid_fsaamode, VID_Changed_f);
+	Cvar_SetCallback(&vid_fsaa, VID_Changed_f);
+	Cvar_SetCallback(&vid_vsync, VID_Changed_f);
+	Cvar_SetCallback(&vid_desktopfullscreen, VID_Changed_f);
+	Cvar_SetCallback(&vid_borderless, VID_Changed_f);
 
-	putenv (vid_center);	/* SDL_putenv is problematic in versions <= 1.2.9 */
+	Cmd_AddCommand("vid_unlock", VID_Unlock); //johnfitz
+	Cmd_AddCommand("vid_restart", VID_Restart); //johnfitz
+	Cmd_AddCommand("vid_test", VID_Test); //johnfitz
+	Cmd_AddCommand("vid_describecurrentmode", VID_DescribeCurrentMode_f);
+	Cmd_AddCommand("vid_describemodes", VID_DescribeModes_f);
 
-	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0)
+	putenv(vid_center);	/* SDL_putenv is problematic in versions <= 1.2.9 */
+
+	if (SDL_InitSubSystem(SDL_INIT_VIDEO) < 0) {
 		Sys_Error("Couldn't init SDL video: %s", SDL_GetError());
-
-	{
-		SDL_DisplayMode mode;
-		if (SDL_GetDesktopDisplayMode(0, &mode) != 0)
-			Sys_Error("Could not get desktop display mode");
-
-		display_width = mode.w;
-		display_height = mode.h;
-		display_refreshrate = mode.refresh_rate;
-		display_bpp = SDL_BITSPERPIXEL(mode.format);
 	}
 
-	Cvar_SetValueQuick (&vid_bpp, (float)display_bpp);
+	SDL_DisplayMode mode;
+	if (SDL_GetDesktopDisplayMode(0, &mode) != 0) {
+		Sys_Error("Could not get desktop display mode");
+	}
 
-	if (CFG_OpenConfig("config.cfg") == 0)
-	{
+	display_width = mode.w;
+	display_height = mode.h;
+	display_refreshrate = mode.refresh_rate;
+	display_bpp = SDL_BITSPERPIXEL(mode.format);
+
+	Cvar_SetValueQuick(&vid_bpp, (float)display_bpp);
+
+	if (CFG_OpenConfig("config.cfg") == 0) {
 		CFG_ReadCvars(read_vars, num_readvars);
 		CFG_CloseConfig();
 	}
@@ -2095,56 +2101,47 @@ void	VID_Init (void)
 
 	VID_InitModelist();
 
-	width = (int)vid_width.value;
-	height = (int)vid_height.value;
-	refreshrate = (int)vid_refreshrate.value;
-	bpp = (int)vid_bpp.value;
-	fullscreen = (int)vid_fullscreen.value;
+	width = display_width;
+	height = display_height;
+	refreshrate = display_refreshrate;
+	bpp = display_bpp;
+	fullscreen = false;
 
-	if (COM_CheckParm("-current"))
-	{
-		width = display_width;
-		height = display_height;
-		refreshrate = display_refreshrate;
-		bpp = display_bpp;
+	p = COM_CheckParm("-width");
+	if (p && p < com_argc-1) {
+		width = Q_atoi(com_argv[p+1]);
+
+		if(!COM_CheckParm("-height")) {
+			height = width * 3 / 4;
+		}
+	}
+
+	p = COM_CheckParm("-height");
+	if (p && p < com_argc-1) {
+		height = Q_atoi(com_argv[p+1]);
+
+		if(!COM_CheckParm("-width")) {
+			width = height * 4 / 3;
+		}
+	}
+
+	p = COM_CheckParm("-refreshrate");
+	if (p && p < com_argc-1) {
+		refreshrate = Q_atoi(com_argv[p+1]);
+	}
+
+	p = COM_CheckParm("-bpp");
+	if (p && p < com_argc-1) {
+		bpp = Q_atoi(com_argv[p+1]);
+	}
+
+	if (COM_CheckParm("-window") || COM_CheckParm("-w")) {
+		fullscreen = false;
+	} else if (COM_CheckParm("-fullscreen") || COM_CheckParm("-f")) {
 		fullscreen = true;
 	}
-	else
-	{
-		p = COM_CheckParm("-width");
-		if (p && p < com_argc-1)
-		{
-			width = Q_atoi(com_argv[p+1]);
 
-			if(!COM_CheckParm("-height"))
-				height = width * 3 / 4;
-		}
-
-		p = COM_CheckParm("-height");
-		if (p && p < com_argc-1)
-		{
-			height = Q_atoi(com_argv[p+1]);
-
-			if(!COM_CheckParm("-width"))
-				width = height * 4 / 3;
-		}
-
-		p = COM_CheckParm("-refreshrate");
-		if (p && p < com_argc-1)
-			refreshrate = Q_atoi(com_argv[p+1]);
-
-		p = COM_CheckParm("-bpp");
-		if (p && p < com_argc-1)
-			bpp = Q_atoi(com_argv[p+1]);
-
-		if (COM_CheckParm("-window") || COM_CheckParm("-w"))
-			fullscreen = false;
-		else if (COM_CheckParm("-fullscreen") || COM_CheckParm("-f"))
-			fullscreen = true;
-	}
-
-	if (!VID_ValidMode(width, height, refreshrate, bpp, fullscreen))
-	{
+	if (!VID_ValidMode(width, height, refreshrate, bpp, fullscreen)) {
 		width = (int)vid_width.value;
 		height = (int)vid_height.value;
 		refreshrate = (int)vid_refreshrate.value;
@@ -2152,8 +2149,7 @@ void	VID_Init (void)
 		fullscreen = (int)vid_fullscreen.value;
 	}
 
-	if (!VID_ValidMode(width, height, refreshrate, bpp, fullscreen))
-	{
+	if (!VID_ValidMode(width, height, refreshrate, bpp, fullscreen)) {
 		width = 640;
 		height = 480;
 		refreshrate = display_refreshrate;
@@ -2164,12 +2160,12 @@ void	VID_Init (void)
 	vid_initialized = true;
 
 	vid.colormap = host_colormap;
-	vid.fullbright = 256 - LittleLong (*((int *)vid.colormap + 2048));
+	vid.fullbright = 256 - LittleLong(*((int *)vid.colormap + 2048));
 
 	// set window icon
 	PL_SetWindowIcon();
 
-	VID_SetMode (width, height, refreshrate, bpp, fullscreen);
+	VID_SetMode(width, height, refreshrate, bpp, fullscreen);
 
 	Con_Printf("\nVulkan Initialization\n");
 	SDL_Vulkan_LoadLibrary(NULL);
@@ -2229,12 +2225,12 @@ static void VID_Restart (void)
 	if (!VID_ValidMode (width, height, refreshrate, bpp, fullscreen))
 	{
 		Con_Printf ("%dx%dx%d %dHz %s is not a valid mode\n",
-				width, height, bpp, refreshrate, fullscreen? "fullscreen" : "windowed");
+		            width, height, bpp, refreshrate, fullscreen? "fullscreen" : "windowed");
 		return;
 	}
 
 	scr_initialized = false;
-	
+
 	GL_WaitForDeviceIdle();
 	R_DestroyPipelines();
 	GL_DestroyBeforeSetMode();
@@ -2242,7 +2238,7 @@ static void VID_Restart (void)
 	//
 	// set new mode
 	//
-	VID_SetMode (width, height, refreshrate, bpp, fullscreen);
+	VID_SetMode(width, height, refreshrate, bpp, fullscreen);
 
 	GL_CreateSwapChain();
 	GL_CreateColorBuffer();
@@ -2253,7 +2249,7 @@ static void VID_Restart (void)
 	GL_CreateDescriptorSets();
 
 	//conwidth and conheight need to be recalculated
-	vid.conwidth = (scr_conwidth.value > 0) ? (int)scr_conwidth.value : (scr_conscale.value > 0) ? (int)(vid.width/scr_conscale.value) : vid.width;
+	vid.conwidth = (scr_conwidth.value > 0) ? (int)scr_conwidth.value : (scr_uiscale.value > 0) ? (int)(vid.width/scr_uiscale.value) : vid.width;
 	vid.conwidth = CLAMP (320, vid.conwidth, vid.width);
 	vid.conwidth &= 0xFFFFFFF8;
 	vid.conheight = vid.conwidth * vid.height / vid.width;
@@ -2333,7 +2329,7 @@ void	VID_Toggle (void)
 	{
 		vid_toggle_works = false;
 		Con_DPrintf ("SDL_WM_ToggleFullScreen failed, attempting VID_Restart\n");
-	vrestart:
+vrestart:
 		Cvar_SetQuick (&vid_fullscreen, VID_GetFullscreen() ? "0" : "1");
 		Cbuf_AddText ("vid_restart\n");
 	}
@@ -2418,7 +2414,7 @@ static void VID_Menu_Init (void)
 		for (j = 0; j < vid_menu_nummodes; j++)
 		{
 			if (vid_menu_modes[j].width == w &&
-				vid_menu_modes[j].height == h)
+			        vid_menu_modes[j].height == h)
 				break;
 		}
 
@@ -2451,7 +2447,7 @@ static void VID_Menu_RebuildBppList (void)
 
 		//bpp list is limited to bpps available with current width/height
 		if (modelist[i].width != vid_width.value ||
-			modelist[i].height != vid_height.value)
+		        modelist[i].height != vid_height.value)
 			continue;
 
 		b = modelist[i].bpp;
@@ -2495,44 +2491,44 @@ regenerates rate list based on current vid_width, vid_height and vid_bpp
 static void VID_Menu_RebuildRateList (void)
 {
 	int i,j,r;
-	
+
 	vid_menu_numrates=0;
-	
-	for (i=0;i<nummodes;i++)
+
+	for (i=0; i<nummodes; i++)
 	{
 		//rate list is limited to rates available with current width/height/bpp
 		if (modelist[i].width != vid_width.value ||
-		    modelist[i].height != vid_height.value ||
-		    modelist[i].bpp != vid_bpp.value)
+		        modelist[i].height != vid_height.value ||
+		        modelist[i].bpp != vid_bpp.value)
 			continue;
-		
+
 		r = modelist[i].refreshrate;
-		
-		for (j=0;j<vid_menu_numrates;j++)
+
+		for (j=0; j<vid_menu_numrates; j++)
 		{
 			if (vid_menu_rates[j] == r)
 				break;
 		}
-		
+
 		if (j==vid_menu_numrates)
 		{
 			vid_menu_rates[j] = r;
 			vid_menu_numrates++;
 		}
 	}
-	
+
 	//if there are no valid fullscreen refreshrates for this width/height, just pick one
 	if (vid_menu_numrates == 0)
 	{
 		Cvar_SetValue ("vid_refreshrate",(float)modelist[0].refreshrate);
 		return;
 	}
-	
+
 	//if vid_refreshrate is not in the new list, change vid_refreshrate
-	for (i=0;i<vid_menu_numrates;i++)
+	for (i=0; i<vid_menu_numrates; i++)
 		if (vid_menu_rates[i] == (int)(vid_refreshrate.value))
 			break;
-	
+
 	if (i==vid_menu_numrates)
 		Cvar_SetValue ("vid_refreshrate",(float)vid_menu_rates[0]);
 }
@@ -2554,7 +2550,7 @@ static void VID_Menu_ChooseNextMode (int dir)
 		for (i = 0; i < vid_menu_nummodes; i++)
 		{
 			if (vid_menu_modes[i].width == vid_width.value &&
-				vid_menu_modes[i].height == vid_height.value)
+			        vid_menu_modes[i].height == vid_height.value)
 				break;
 		}
 
@@ -2646,7 +2642,7 @@ static void VID_Menu_ChooseNextAASamples(int dir)
 		else
 			value = 2;
 	}
-	else 
+	else
 	{
 		if (value <= 2)
 			value = 0;
@@ -2683,13 +2679,13 @@ chooses next refresh rate in order, then updates vid_refreshrate cvar
 static void VID_Menu_ChooseNextRate (int dir)
 {
 	int i;
-	
-	for (i=0;i<vid_menu_numrates;i++)
+
+	for (i=0; i<vid_menu_numrates; i++)
 	{
 		if (vid_menu_rates[i] == vid_refreshrate.value)
 			break;
 	}
-	
+
 	if (i==vid_menu_numrates) //can't find it in list
 	{
 		i = 0;
@@ -2702,7 +2698,7 @@ static void VID_Menu_ChooseNextRate (int dir)
 		else if (i<0)
 			i = vid_menu_numrates-1;
 	}
-	
+
 	Cvar_SetValue ("vid_refreshrate",(float)vid_menu_rates[i]);
 }
 
@@ -3009,7 +3005,7 @@ void SCR_ScreenShot_f (void)
 	qboolean	ok;
 
 	qboolean bgra = (vulkan_globals.swap_chain_format == VK_FORMAT_B8G8R8A8_UNORM)
-		|| (vulkan_globals.swap_chain_format == VK_FORMAT_B8G8R8A8_SRGB);
+	                || (vulkan_globals.swap_chain_format == VK_FORMAT_B8G8R8A8_SRGB);
 
 	Q_strncpy (ext, "png", sizeof(ext));
 
@@ -3018,8 +3014,8 @@ void SCR_ScreenShot_f (void)
 		const char	*requested_ext = Cmd_Argv (1);
 
 		if (!q_strcasecmp ("png", requested_ext)
-		    || !q_strcasecmp ("tga", requested_ext)
-		    || !q_strcasecmp ("jpg", requested_ext))
+		        || !q_strcasecmp ("tga", requested_ext)
+		        || !q_strcasecmp ("jpg", requested_ext))
 			Q_strncpy (ext, requested_ext, sizeof(ext));
 		else
 		{
@@ -3039,9 +3035,9 @@ void SCR_ScreenShot_f (void)
 	}
 
 	if ((vulkan_globals.swap_chain_format != VK_FORMAT_B8G8R8A8_UNORM)
-		&& (vulkan_globals.swap_chain_format != VK_FORMAT_B8G8R8A8_SRGB)
-		&& (vulkan_globals.swap_chain_format != VK_FORMAT_R8G8B8A8_UNORM)
-		&& (vulkan_globals.swap_chain_format != VK_FORMAT_R8G8B8A8_SRGB))
+	        && (vulkan_globals.swap_chain_format != VK_FORMAT_B8G8R8A8_SRGB)
+	        && (vulkan_globals.swap_chain_format != VK_FORMAT_R8G8B8A8_UNORM)
+	        && (vulkan_globals.swap_chain_format != VK_FORMAT_R8G8B8A8_SRGB))
 	{
 		Con_Printf ("SCR_ScreenShot_f: Unsupported surface format\n");
 		return;

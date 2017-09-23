@@ -1881,7 +1881,7 @@ byte *COM_LoadMallocFile_TextMode_OSPath (const char *path, long *len_out)
 	FILE	*f;
 	byte	*data;
 	long	len, actuallen;
-	
+
 	// ericw -- this is used by Host_Loadgame_f. Translate CRLF to LF on load games,
 	// othewise multiline messages have a garbage character at the end of each line.
 	// TODO: could handle in a way that allows loading CRLF savegames on mac/linux
@@ -1889,11 +1889,11 @@ byte *COM_LoadMallocFile_TextMode_OSPath (const char *path, long *len_out)
 	f = fopen (path, "rt");
 	if (f == NULL)
 		return NULL;
-	
+
 	len = COM_filelength (f);
 	if (len < 0)
 		return NULL;
-	
+
 	data = (byte *) malloc (len + 1);
 	if (data == NULL)
 		return NULL;
@@ -1906,7 +1906,7 @@ byte *COM_LoadMallocFile_TextMode_OSPath (const char *path, long *len_out)
 		return NULL;
 	}
 	data[actuallen] = '\0';
-	
+
 	if (len_out != NULL)
 		*len_out = actuallen;
 	return data;
@@ -2044,17 +2044,18 @@ _add_path:
 	com_searchpaths = search;
 
 	// add any pak files in the format pak0.pak pak1.pak, ...
-	for (i = 0; ; i++)
-	{
-		q_snprintf (pakfile, sizeof(pakfile), "%s/pak%i.pak", com_gamedir, i);
-		pak = COM_LoadPackFile (pakfile);
-		if (i != 0 || path_id != 1 || fitzmode)
+	for (i = 0; ; i++) {
+		q_snprintf(pakfile, sizeof(pakfile), "%s/pak%i.pak", com_gamedir, i);
+		pak = COM_LoadPackFile(pakfile);
+		if (i != 0 || path_id != 1 || fitzmode) {
 			qspak = NULL;
-		else {
+		} else {
 			qboolean old = com_modified;
-			if (been_here) base = host_parms->userdir;
-			q_snprintf (pakfile, sizeof(pakfile), "%s/vkquake.pak", base);
-			qspak = COM_LoadPackFile (pakfile);
+			if (been_here) {
+				base = host_parms->userdir;
+			}
+			q_snprintf(pakfile, sizeof(pakfile), "%s/vkquake.pak", base);
+			qspak = COM_LoadPackFile(pakfile);
 			com_modified = old;
 		}
 		if (pak) {
@@ -2074,8 +2075,7 @@ _add_path:
 		if (!pak) break;
 	}
 
-	if (!been_here && host_parms->userdir != host_parms->basedir)
-	{
+	if (!been_here && host_parms->userdir != host_parms->basedir) {
 		been_here = true;
 		q_strlcpy(com_gamedir, va("%s/%s", host_parms->userdir, dir), sizeof(com_gamedir));
 		Sys_mkdir(com_gamedir);
@@ -2086,29 +2086,24 @@ _add_path:
 //==============================================================================
 //johnfitz -- dynamic gamedir stuff -- modified by QuakeSpasm team.
 //==============================================================================
-void ExtraMaps_NewGame (void);
-static void COM_Game_f (void)
-{
-	if (Cmd_Argc() > 1)
-	{
+void ExtraMaps_NewGame(void);
+static void COM_Game_f(void) {
+	if (Cmd_Argc() > 1) {
 		const char *p = Cmd_Argv(1);
 		const char *p2 = Cmd_Argv(2);
 		searchpath_t *search;
 
-		if (!registered.value) //disable shareware quake
-		{
+		if (!registered.value) { //disable shareware quake
 			Con_Printf("You must have the registered version to use modified games\n");
 			return;
 		}
 
-		if (!*p || !strcmp(p, ".") || strstr(p, "..") || strstr(p, "/") || strstr(p, "\\") || strstr(p, ":"))
-		{
+		if (!*p || !strcmp(p, ".") || strstr(p, "..") || strstr(p, "/") || strstr(p, "\\") || strstr(p, ":")) {
 			Con_Printf ("gamedir should be a single directory name, not a path\n");
 			return;
 		}
 
-		if (*p2)
-		{
+		if (*p2) {
 			if (strcmp(p2,"-hipnotic") && strcmp(p2,"-rogue") && strcmp(p2,"-quoth")) {
 				Con_Printf ("invalid mission pack argument to \"game\"\n");
 				return;
@@ -2119,21 +2114,23 @@ static void COM_Game_f (void)
 			}
 		}
 
-		if (!q_strcasecmp(p, COM_SkipPath(com_gamedir))) //no change
-		{
+		if (!q_strcasecmp(p, COM_SkipPath(com_gamedir))) { //no change
 			if (com_searchpaths->path_id > 1) { //current game not id1
 				if (*p2 && com_searchpaths->path_id == 2) {
 					// rely on QuakeSpasm extension treating '-game missionpack'
 					// as '-missionpack', otherwise would be a mess
-					if (!q_strcasecmp(p, &p2[1]))
-						goto _same;
+					if (!q_strcasecmp(p, &p2[1])) {
+						Con_Printf("\"game\" is already \"%s\"\n", COM_SkipPath(com_gamedir));
+						return;
+					}
 					Con_Printf("reloading game \"%s\" with \"%s\" support\n", p, &p2[1]);
-				}
-				else if (!*p2 && com_searchpaths->path_id > 2)
+				} else if (!*p2 && com_searchpaths->path_id > 2) {
 					Con_Printf("reloading game \"%s\" without mission pack support\n", p);
-				else goto _same;
-			}
-			else { _same:
+				} else {
+					Con_Printf("\"game\" is already \"%s\"\n", COM_SkipPath(com_gamedir));
+					return;
+				}
+			} else {
 				Con_Printf("\"game\" is already \"%s\"\n", COM_SkipPath(com_gamedir));
 				return;
 			}
