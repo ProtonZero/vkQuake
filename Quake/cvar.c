@@ -412,14 +412,14 @@ void Cvar_SetValueQuick(cvar_t *var, const float value) {
 	if (value == (float)(int)value) {
 		q_snprintf(val, sizeof(val), "%i", (int)value);
 	} else {
-		q_snprintf(val, sizeof(val), "%g", value);
+		q_snprintf(val, sizeof(val), "%f", value);
 		// kill trailing zeroes
-		/*
-		while (*ptr)
+		while (*ptr) {
 			ptr++;
-		while (--ptr > val && *ptr == '0' && ptr[-1] != '.')
+		}
+		while (--ptr > val && *ptr == '0' && ptr[-1] != '.') {
 			*ptr = '\0';
-		*/
+		}
 	}
 
 	Cvar_SetQuick(var, val);
@@ -451,16 +451,14 @@ void Cvar_SetValue(const char *var_name, const float value) {
 	if (value == (float)(int)value) {
 		q_snprintf(val, sizeof(val), "%i", (int)value);
 	} else {
-		q_snprintf(val, sizeof(val), "%g", value);
+		q_snprintf(val, sizeof(val), "%f", value);
 		// kill trailing zeroes
-		/*
 		while (*ptr) {
 			ptr++;
 		}
 		while (--ptr > val && *ptr == '0' && ptr[-1] != '.') {
 			*ptr = '\0';
 		}
-		*/
 	}
 
 	Cvar_Set(var_name, val);

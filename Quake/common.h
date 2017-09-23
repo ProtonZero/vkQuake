@@ -52,7 +52,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 	({ __typeof__ (minval) _minval = (minval); \
 	   __typeof__ (x) _x = (x); \
 	   __typeof__ (maxval) _maxval = (maxval); \
-	   _x < _minval ? _minval : x > _maxval ? maxval : x; })
+	   _x < _minval ? _minval : _x > _maxval ? _maxval : _x; })
 
 typedef struct sizebuf_s
 {

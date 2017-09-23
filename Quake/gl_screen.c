@@ -87,7 +87,7 @@ cvar_t		scr_clock = {"scr_clock", "0", CVAR_NONE};
 //johnfitz
 
 cvar_t		scr_viewsize = {"viewsize","100", CVAR_ARCHIVE};
-cvar_t		scr_fov = {"fov","90",CVAR_NONE};	// 10 - 170
+cvar_t		scr_fov = {"fov","90",CVAR_ARCHIVE};	// 10 - 170
 cvar_t		scr_fov_adapt = {"fov_adapt","1",CVAR_ARCHIVE};
 cvar_t		scr_conspeed = {"scr_conspeed","500",CVAR_ARCHIVE};
 cvar_t		scr_centertime = {"scr_centertime","2",CVAR_NONE};
@@ -365,10 +365,7 @@ static void SCR_CalcRefdef(void)
 	r_refdef.vrect.y = (glheight - sb_lines - r_refdef.vrect.height)/2;
 	//johnfitz
 
-	//Con_Printf("Calculated FOV for sphere area %g: %g\n", scr_fov.value > 90 ? SPHERE_AREA_110_4_3 : SPHERE_AREA_90_4_3, AdaptFovx(scr_fov.value > 90 ? SPHERE_AREA_110_4_3 : SPHERE_AREA_90_4_3, vid.width, vid.height));
 	r_refdef.fov_x = AdaptFovx(scr_fov.value > 90 ? SPHERE_AREA_110_4_3 : SPHERE_AREA_90_4_3, vid.width, vid.height);
-	//r_refdef.fov_x = AdaptFovx(scr_fov.value > 90 ? 110 : 90, vid.width, vid.height);
-	//Con_Printf("Calculated vFOV: %g\n", CalcFovy(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height));
 	r_refdef.fov_y = CalcFovy(r_refdef.fov_x, r_refdef.vrect.width, r_refdef.vrect.height);
 
 	scr_vrect = r_refdef.vrect;
@@ -382,8 +379,7 @@ SCR_SizeUp_f
 Keybinding command
 =================
 */
-void SCR_SizeUp_f (void)
-{
+void SCR_SizeUp_f (void) {
 	Cvar_SetValueQuick (&scr_viewsize, scr_viewsize.value+10);
 }
 

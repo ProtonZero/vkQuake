@@ -1051,50 +1051,36 @@ void M_AdjustSliders(int dir)
 		Cvar_SetValue ("scr_uiscale", f);
 		break;
 		*/
-	case OPT_SCRSIZE:	// screen size
-		f = scr_viewsize.value + dir * 10;
-		if (f > 120)	f = 120;
-		else if(f < 30)	f = 30;
-		Cvar_SetValue ("viewsize", f);
+		case OPT_SCRSIZE:	// screen size
+		f = CLAMP(30, scr_viewsize.value + dir * 10, 120);
+		Cvar_SetValue("viewsize", f);
 		break;
 	case OPT_GAMMA:	// gamma
-		f = vid_gamma.value - dir * 0.05;
-		if (f < 0.5)	f = 0.5;
-		else if (f > 1)	f = 1;
-		Cvar_SetValue ("gamma", f);
+		f = CLAMP(0.5, vid_gamma.value - dir * 0.05, 1);
+		Cvar_SetValue("gamma", f);
 		break;
 	case OPT_CONTRAST:	// contrast
-		f = vid_contrast.value + dir * 0.1;
-		if (f < 1)	f = 1;
-		else if (f > 2)	f = 2;
-		Cvar_SetValue ("contrast", f);
+		f = CLAMP(1, vid_contrast.value + dir * 0.1, 2);
+		Cvar_SetValue("contrast", f);
 		break;
 	case OPT_MOUSESPEED:	// mouse speed
-		f = sensitivity.value + dir * 0.5;
-		if (f > 11)	f = 11;
-		else if (f < 1)	f = 1;
-		Cvar_SetValue ("sensitivity", f);
+		f = CLAMP(1, sensitivity.value + dir * 0.5, 11);
+		Cvar_SetValue("sensitivity", f);
 		break;
 	case OPT_SBALPHA:	// statusbar alpha
-		f = scr_sbaralpha.value - dir * 0.05;
-		if (f < 0)	f = 0;
-		else if (f > 1)	f = 1;
-		Cvar_SetValue ("scr_sbaralpha", f);
+		f = CLAMP(0.0, scr_sbaralpha.value - dir * 0.05, 1.0);
+		Cvar_SetValue("scr_sbaralpha", f);
 		break;
 	case OPT_MUSICVOL:	// music volume
-		f = bgmvolume.value + dir * 0.1;
-		if (f < 0)	f = 0;
-		else if (f > 1)	f = 1;
-		Cvar_SetValue ("bgmvolume", f);
+		f = CLAMP(0, bgmvolume.value + dir * 0.1, 1);
+		Cvar_SetValue("bgmvolume", f);
 		break;
 	case OPT_MUSICEXT:	// enable external music vs cdaudio
-		Cvar_Set ("bgm_extmusic", bgm_extmusic.value ? "0" : "1");
+		Cvar_Set("bgm_extmusic", bgm_extmusic.value ? "0" : "1");
 		break;
 	case OPT_SNDVOL:	// sfx volume
-		f = sfxvolume.value + dir * 0.1;
-		if (f < 0)	f = 0;
-		else if (f > 1)	f = 1;
-		Cvar_SetValue ("volume", f);
+		f = CLAMP(0, sfxvolume.value + dir * 0.1, 1);
+		Cvar_SetValue("volume", f);
 		break;
 
 	case OPT_HIGHFOV:	// "Quake Pro" fov
@@ -1206,8 +1192,7 @@ void M_Options_Draw (void)
 
 	// OPT_SBALPHA:
 	M_Print(16, 32 + 8*OPT_SBALPHA,     "       Statusbar alpha");
-	r = 1 - scr_sbaralpha.value; // scr_sbaralpha range is 1.0 to 0.0
-	M_DrawSlider(220, 32 + 8*OPT_SBALPHA, r);
+	M_DrawSlider(220, 32 + 8*OPT_SBALPHA, 1 - scr_sbaralpha.value);
 
 	// OPT_SNDVOL:
 	M_Print(16, 32 + 8*OPT_SNDVOL,      "          Sound volume");
