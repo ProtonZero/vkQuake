@@ -36,8 +36,6 @@ cvar_t	cl_nolerp = {"cl_nolerp","0",CVAR_NONE};
 
 cvar_t	cfg_unbindall = {"cfg_unbindall", "1", CVAR_ARCHIVE};
 
-cvar_t	lookspring = {"lookspring","0", CVAR_ARCHIVE};
-cvar_t	lookstrafe = {"lookstrafe","0", CVAR_ARCHIVE};
 cvar_t	sensitivity = {"sensitivity","3", CVAR_ARCHIVE};
 
 cvar_t	m_pitch = {"m_pitch","0.022", CVAR_ARCHIVE};
@@ -446,7 +444,7 @@ void CL_RelinkEntities (void)
 	{
 		if (!ent->model)
 		{	// empty slot
-			
+
 			// ericw -- efrags are only used for static entities in GLQuake
 			// ent can't be static, so this is a no-op.
 			//if (ent->forcelink)
@@ -788,10 +786,8 @@ void CL_Init (void)
 	Cvar_RegisterVariable (&cl_anglespeedkey);
 	Cvar_RegisterVariable (&cl_shownet);
 	Cvar_RegisterVariable (&cl_nolerp);
-	Cvar_RegisterVariable (&lookspring);
-	Cvar_RegisterVariable (&lookstrafe);
 	Cvar_RegisterVariable (&sensitivity);
-	
+
 	Cvar_RegisterVariable (&cl_alwaysrun);
 
 	Cvar_RegisterVariable (&m_pitch);

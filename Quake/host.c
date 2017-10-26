@@ -297,49 +297,28 @@ Host_WriteConfiguration
 Writes key bindings and archived cvars to config.cfg
 ===============
 */
-void Host_WriteConfiguration (void)
-{
-	FILE	*f;
+void Host_WriteConfiguration(void) {
+	FILE *f;
 
 // dedicated servers initialize the host but don't parse and set the
 // config.cfg cvars
-	if (host_initialized & !isDedicated)
-	{
-		f = fopen (va("%s/config.cfg", com_gamedir), "w");
-		if (!f)
-		{
-			Con_Printf ("Couldn't write config.cfg.\n");
+	if (host_initialized & !isDedicated) {
+		f = fopen(va("%s/config.cfg", com_gamedir), "w");
+		if (!f) {
+			Con_Printf("Couldn't write config.cfg.\n");
 			return;
 		}
 
-		VID_SyncCvars (); //johnfitz -- write actual current mode to config file, in case cvars were messed with
+		VID_SyncCvars(); //johnfitz -- write actual current mode to config file, in case cvars were messed with
 
-		Key_WriteBindings (f);
-		Cvar_WriteVariables (f);
+		Key_WriteBindings(f);
+		Cvar_WriteVariables(f);
 
 		//johnfitz -- extra commands to preserve state
-		fprintf (f, "vid_restart\n");
-		if (in_mlook.state & 1) fprintf (f, "+mlook\n");
+		fprintf(f, "vid_restart\n");
 		//johnfitz
 
-		fclose (f);
-
-//johnfitz -- also save fitzquake.rc
-#if 0
-		f = fopen (va("%s/fitzquake.rc", GAMENAME), "w"); //always save in id1
-		if (!f)
-		{
-			Con_Printf ("Couldn't write fitzquake.rc.\n");
-			return;
-		}
-
-		Cvar_WriteVariables (f);
-		fprintf (f, "vid_restart\n");
-		if (in_mlook.state & 1) fprintf (f, "+mlook\n");
-
-		fclose (f);
-#endif
-//johnfitz
+		fclose(f);
 	}
 }
 

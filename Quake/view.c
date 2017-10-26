@@ -169,11 +169,10 @@ V_DriftPitch
 
 Moves the client pitch angle towards cl.idealpitch sent by the server.
 
-If the user is adjusting pitch manually, either with lookup/lookdown,
-mlook and mouse, or klook and keyboard, pitch drifting is constantly stopped.
+If the user is adjusting pitch manually, either with lookup/lookdown
+or klook and keyboard, pitch drifting is constantly stopped.
 
-Drifting is enabled when the center view key is hit, mlook is released and
-lookspring is non 0, or when
+Drifting is enabled when the center view key is hit
 ===============
 */
 void V_DriftPitch (void)
@@ -189,25 +188,18 @@ void V_DriftPitch (void)
 	}
 
 // don't count small mouse motion
-	if (cl.nodrift)
-	{
-		if ( fabs(cl.cmd.forwardmove) < cl_forwardspeed.value)
+	if (cl.nodrift)	{
+		if (fabs(cl.cmd.forwardmove) < cl_forwardspeed.value) {
 			cl.driftmove = 0;
-		else
+		} else {
 			cl.driftmove += host_frametime;
-
-		if ( cl.driftmove > v_centermove.value)
-		{
-			if (lookspring.value)
-				V_StartPitchDrift ();
 		}
 		return;
 	}
 
 	delta = cl.idealpitch - cl.viewangles[PITCH];
 
-	if (!delta)
-	{
+	if (!delta) {
 		cl.pitchvel = 0;
 		return;
 	}
@@ -217,19 +209,15 @@ void V_DriftPitch (void)
 
 //Con_Printf ("move: %f (%f)\n", move, host_frametime);
 
-	if (delta > 0)
-	{
-		if (move > delta)
-		{
+	if (delta > 0) {
+		if (move > delta) {
 			cl.pitchvel = 0;
 			move = delta;
 		}
 		cl.viewangles[PITCH] += move;
 	}
-	else if (delta < 0)
-	{
-		if (move > -delta)
-		{
+	else if (delta < 0) {
+		if (move > -delta) {
 			cl.pitchvel = 0;
 			move = -delta;
 		}
@@ -245,10 +233,10 @@ void V_DriftPitch (void)
 ==============================================================================
 */
 
-cshift_t	cshift_empty = { {130,80,50}, 0 };
+cshift_t	cshift_empty = { {130,80,50},   0 };
 cshift_t	cshift_water = { {130,80,50}, 128 };
-cshift_t	cshift_slime = { {0,25,5}, 150 };
-cshift_t	cshift_lava = { {255,80,0}, 150 };
+cshift_t	cshift_slime = { {  0,25, 5}, 150 };
+cshift_t	cshift_lava =  { {255,80, 0}, 150 };
 
 float		v_blend[4];		// rgba 0.0 - 1.0
 
@@ -940,7 +928,7 @@ void V_Init (void)
 	Cvar_RegisterVariable (&v_kickroll);
 	Cvar_RegisterVariable (&v_kickpitch);
 	Cvar_RegisterVariable (&v_gunkick); //johnfitz
-	
+
 	Cvar_RegisterVariable (&r_viewmodel_quake); //MarkV
 }
 

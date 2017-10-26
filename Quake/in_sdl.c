@@ -131,22 +131,22 @@ void IN_StartupJoystick (void)
 	int nummappings;
 	char controllerdb[MAX_OSPATH];
 	SDL_GameController *gamecontroller;
-	
+
 	if (COM_CheckParm("-nojoy"))
 		return;
-	
+
 	if (SDL_InitSubSystem(SDL_INIT_GAMECONTROLLER) == -1 )
 	{
 		Con_Warning("could not initialize SDL Game Controller\n");
 		return;
 	}
-	
+
 	// Load additional SDL2 controller definitions from gamecontrollerdb.txt
 	q_snprintf (controllerdb, sizeof(controllerdb), "%s/gamecontrollerdb.txt", com_basedir);
 	nummappings = SDL_GameControllerAddMappingsFromFile(controllerdb);
 	if (nummappings > 0)
 		Con_Printf("%d mappings loaded from gamecontrollerdb.txt\n", nummappings);
-	
+
 	// Also try host_parms->userdir
 	if (host_parms->userdir != host_parms->basedir)
 	{
@@ -166,7 +166,7 @@ void IN_StartupJoystick (void)
 			if (gamecontroller)
 			{
 				Con_Printf("detected controller: %s\n", controllername != NULL ? controllername : "NULL");
-				
+
 				joy_active_instaceid = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gamecontroller));
 				joy_active_controller = gamecontroller;
 				break;
@@ -282,12 +282,12 @@ static joyaxis_t IN_ApplyLookEasing(joyaxis_t axis, float exponent)
 	joyaxis_t result = {0};
 	vec_t eased_magnitude;
 	vec_t magnitude = IN_AxisMagnitude(axis);
-	
+
 	if (magnitude == 0)
 		return result;
-	
+
 	eased_magnitude = powf(magnitude, exponent);
-	
+
 	result.x = axis.x * (eased_magnitude / magnitude);
 	result.y = axis.y * (eased_magnitude / magnitude);
 	return result;
@@ -306,10 +306,10 @@ static joyaxis_t IN_ApplyMoveEasing(joyaxis_t axis)
 {
 	joyaxis_t result = {0};
 	const float v = sqrtf(2.0f) / 2.0f;
-	
+
 	result.x = q_max(-v, q_min(v, axis.x));
 	result.y = q_max(-v, q_min(v, axis.y));
-	
+
 	result.x /= v;
 	result.y /= v;
 
@@ -334,14 +334,14 @@ static joyaxis_t IN_ApplyDeadzone(joyaxis_t axis, float deadzone)
 {
 	joyaxis_t result = {0};
 	vec_t magnitude = IN_AxisMagnitude(axis);
-	
+
 	if ( magnitude > deadzone ) {
 		const vec_t new_magnitude = q_min(1.0, (magnitude - deadzone) / (1.0 - deadzone));
 		const vec_t scale = new_magnitude / magnitude;
 		result.x = axis.x * scale;
 		result.y = axis.y * scale;
 	}
-	
+
 	return result;
 }
 
@@ -386,7 +386,7 @@ static void IN_JoyKeyEvent(qboolean wasdown, qboolean isdown, int key, double *t
 {
 	// we can't use `realtime` for key repeats because it is not monotomic
 	const double currenttime = Sys_DoubleTime();
-	
+
 	if (wasdown)
 	{
 		if (isdown)
@@ -426,10 +426,10 @@ void IN_Commands (void)
 	int i;
 	const float stickthreshold = 0.9;
 	const float triggerthreshold = joy_deadzone_trigger.value;
-	
+
 	if (!joy_enable.value)
 		return;
-	
+
 	if (!joy_active_controller)
 		return;
 
@@ -438,18 +438,18 @@ void IN_Commands (void)
 	{
 		qboolean newstate = SDL_GameControllerGetButton(joy_active_controller, (SDL_GameControllerButton)i);
 		qboolean oldstate = joy_buttonstate.buttondown[i];
-		
+
 		joy_buttonstate.buttondown[i] = newstate;
-		
+
 		// NOTE: This can cause a reentrant call of IN_Commands, via SCR_ModalMessage when confirming a new game.
 		IN_JoyKeyEvent(oldstate, newstate, IN_KeyForControllerButton((SDL_GameControllerButton)i), &joy_buttontimer[i]);
 	}
-	
+
 	for (i = 0; i < SDL_CONTROLLER_AXIS_MAX; i++)
 	{
 		newaxisstate.axisvalue[i] = SDL_GameControllerGetAxis(joy_active_controller, (SDL_GameControllerAxis)i) / 32768.0f;
 	}
-	
+
 	// emit emulated arrow keys so the analog sticks can be used in the menu
 	if (key_dest != key_game)
 	{
@@ -462,11 +462,11 @@ void IN_Commands (void)
 		IN_JoyKeyEvent(joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_RIGHTY] < -stickthreshold,newaxisstate.axisvalue[SDL_CONTROLLER_AXIS_RIGHTY] < -stickthreshold, K_UPARROW, &joy_emulatedkeytimer[6]);
 		IN_JoyKeyEvent(joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_RIGHTY] > stickthreshold, newaxisstate.axisvalue[SDL_CONTROLLER_AXIS_RIGHTY] > stickthreshold, K_DOWNARROW, &joy_emulatedkeytimer[7]);
 	}
-	
+
 	// emit emulated keys for the analog triggers
 	IN_JoyKeyEvent(joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_TRIGGERLEFT] > triggerthreshold,  newaxisstate.axisvalue[SDL_CONTROLLER_AXIS_TRIGGERLEFT] > triggerthreshold, K_LTRIGGER, &joy_emulatedkeytimer[8]);
 	IN_JoyKeyEvent(joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_TRIGGERRIGHT] > triggerthreshold, newaxisstate.axisvalue[SDL_CONTROLLER_AXIS_TRIGGERRIGHT] > triggerthreshold, K_RTRIGGER, &joy_emulatedkeytimer[9]);
-	
+
 	joy_axisstate = newaxisstate;
 }
 
@@ -483,28 +483,28 @@ void IN_JoyMove (usercmd_t *cmd)
 
 	if (!joy_enable.value)
 		return;
-	
+
 	if (!joy_active_controller)
 		return;
-	
+
 	moveRaw.x = joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_LEFTX];
 	moveRaw.y = joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_LEFTY];
 	lookRaw.x = joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_RIGHTX];
 	lookRaw.y = joy_axisstate.axisvalue[SDL_CONTROLLER_AXIS_RIGHTY];
-	
+
 	if (joy_swapmovelook.value)
 	{
 		joyaxis_t temp = moveRaw;
 		moveRaw = lookRaw;
 		lookRaw = temp;
 	}
-	
+
 	moveDeadzone = IN_ApplyDeadzone(moveRaw, joy_deadzone.value);
 	lookDeadzone = IN_ApplyDeadzone(lookRaw, joy_deadzone.value);
 
 	moveEased = IN_ApplyMoveEasing(moveDeadzone);
 	lookEased = IN_ApplyLookEasing(lookDeadzone, joy_exponent.value);
-	
+
 	if ((in_speed.state & 1) ^ (cl_alwaysrun.value != 0.0))
 		speed = cl_movespeedkey.value;
 	else
@@ -526,42 +526,32 @@ void IN_JoyMove (usercmd_t *cmd)
 		cl.viewangles[PITCH] = cl_minpitch.value;
 }
 
-void IN_MouseMove(usercmd_t *cmd)
-{
-	int		dmx, dmy;
-
-	dmx = total_dx * sensitivity.value;
-	dmy = total_dy * sensitivity.value;
+void IN_MouseMove(usercmd_t *cmd) {
+	int dmx = total_dx * sensitivity.value;
+	int dmy = total_dy * sensitivity.value;
 
 	total_dx = 0;
 	total_dy = 0;
 
-	if ( (in_strafe.state & 1) || (lookstrafe.value && (in_mlook.state & 1) ))
+	if (in_strafe.state & 1) {
 		cmd->sidemove += m_side.value * dmx;
-	else
+	} else {
 		cl.viewangles[YAW] -= m_yaw.value * dmx;
-
-	if (in_mlook.state & 1)
-	{
-		if (dmx || dmy)
-			V_StopPitchDrift ();
 	}
 
-	if ( (in_mlook.state & 1) && !(in_strafe.state & 1))
-	{
-		cl.viewangles[PITCH] += m_pitch.value * dmy;
+	if (dmx || dmy) {
+        V_StopPitchDrift ();
+	}
+
+	if (!(in_strafe.state & 1)) {
 		/* johnfitz -- variable pitch clamping */
-		if (cl.viewangles[PITCH] > cl_maxpitch.value)
-			cl.viewangles[PITCH] = cl_maxpitch.value;
-		if (cl.viewangles[PITCH] < cl_minpitch.value)
-			cl.viewangles[PITCH] = cl_minpitch.value;
-	}
-	else
-	{
-		if ((in_strafe.state & 1) && noclip_anglehack)
+		cl.viewangles[PITCH] = CLAMP(cl_minpitch.value, cl.viewangles[PITCH] + m_pitch.value * dmy, cl_maxpitch.value);
+	} else {
+		if ((in_strafe.state & 1) && noclip_anglehack) {
 			cmd->upmove -= m_forward.value * dmy;
-		else
+		} else {
 			cmd->forwardmove -= m_forward.value * dmy;
+		}
 	}
 }
 
